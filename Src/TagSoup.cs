@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using RT.Util;
 using RT.Util.ExtensionMethods;
 
 namespace RT.TagSoup
@@ -14,7 +15,8 @@ namespace RT.TagSoup
     public abstract class Tag
     {
         /// <summary>Remembers the contents of this tag.</summary>
-        protected List<object> TagContents = null;
+        [RummageNoRename]
+        protected List<object> _tagContents = null;
 
         /// <summary>Name of the tag.</summary>
         public abstract string TagName { get; }
@@ -46,16 +48,16 @@ namespace RT.TagSoup
         /// </remarks>
         public Tag _(params object[] contents)
         {
-            if (TagContents == null)
-                TagContents = new List<object>(contents);
+            if (_tagContents == null)
+                _tagContents = new List<object>(contents);
             else
-                TagContents.AddRange(contents);
+                _tagContents.AddRange(contents);
             return this;
         }
 
         /// <summary>Adds stuff at the end of the contents of this tag (a string, a tag, a collection of strings or of tags).</summary>
         /// <param name="content">The stuff to add.</param>
-        public void Add(object content) { TagContents.Add(content); }
+        public void Add(object content) { _tagContents.Add(content); }
 
         /// <summary>Outputs this tag and all its contents.</summary>
         /// <returns>A collection of strings which, when concatenated, represent this tag and all its contents.</returns>
@@ -97,7 +99,7 @@ namespace RT.TagSoup
                 else
                     yield return " " + fixFieldName(field.Name) + "=\"" + valStr.HtmlEscape() + "\"";
             }
-            if (tagPrinted && AllowXhtmlEmpty && (TagContents == null || TagContents.Count == 0))
+            if (tagPrinted && AllowXhtmlEmpty && (_tagContents == null || _tagContents.Count == 0))
             {
                 yield return "/>";
                 yield break;
@@ -105,7 +107,7 @@ namespace RT.TagSoup
             if (tagPrinted)
                 yield return ">";
             Exception toThrow = null;
-            foreach (object content in TagContents)
+            foreach (object content in _tagContents)
             {
                 if (content == null)
                     continue;

@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
+using RT.Util;
 using RT.Util.ExtensionMethods;
 
 namespace RT.TagSoup.HtmlTags
@@ -11,7 +9,7 @@ namespace RT.TagSoup.HtmlTags
     {
         /// <summary>Constructs an HTML tag.</summary>
         /// <param name="Contents">Contents of the tag.</param>
-        public HtmlTag(params object[] Contents) { TagContents = new List<object>(Contents); }
+        public HtmlTag(params object[] Contents) { _tagContents = new List<object>(Contents); }
         /// <summary>Returns false.</summary>
         public override bool AllowXhtmlEmpty { get { return false; } }
         /// <summary>Creates a simple HTML document from the specified elements.</summary>
@@ -26,6 +24,7 @@ namespace RT.TagSoup.HtmlTags
     public sealed class HtmlTable : TABLE
     {
         /// <summary>If set to a value other than null, causes all rows and cells within the generated table to have the specified CSS class.</summary>
+        [RummageNoRename]
         public string _AllClasses;
 
         /// <summary>Constructs an HTML table in which all rows and cells have the same CSS class.</summary>
@@ -43,24 +42,36 @@ namespace RT.TagSoup.HtmlTags
                     cellTags.Add(classOnAllTags == null ? new TD(cell) : new TD(cell) { class_ = classOnAllTags });
                 rowTags.Add(classOnAllTags == null ? new TR(cellTags.ToArray()) : new TR(cellTags.ToArray()) { class_ = classOnAllTags });
             }
-            TagContents = rowTags;
+            _tagContents = rowTags;
         }
     }
 
 #pragma warning disable 1591    // Missing XML comment for publicly visible type or member
 
+    [RummageNoRenameAnything]
     public enum align { _, left, center, right, justify, char_ }
+    [RummageNoRenameAnything]
     public enum btype { _, button, submit, reset }
+    [RummageNoRenameAnything]
     public enum dir { _, ltr, rtl }
+    [RummageNoRenameAnything]
     public enum frame { _, void_, above, below, hsides, lhs, rhs, vsides, box, border }
+    [RummageNoRenameAnything]
     public enum itype { _, text, password, checkbox, radio, submit, reset, file, hidden, image, button }
+    [RummageNoRenameAnything]
     public enum method { _, get, post }
+    [RummageNoRenameAnything]
     public enum rules { _, none, groups, rows, cols, all }
+    [RummageNoRenameAnything]
     public enum scope { _, row, col, rowgroup, colgroup }
+    [RummageNoRenameAnything]
     public enum shape { _, rect, circle, poly, default_ }
+    [RummageNoRenameAnything]
     public enum valign { _, top, middle, bottom, baseline }
+    [RummageNoRenameAnything]
     public enum valuetype { _, data, ref_, object_ }
 
+    [RummageNoRenameAnything]
     public sealed class A : HtmlTag
     {
         public A(params object[] contents) : base(contents) { }
@@ -96,6 +107,7 @@ namespace RT.TagSoup.HtmlTags
         public string title;
         public string type;
     }
+    [RummageNoRenameAnything]
     public sealed class ABBR : HtmlTag
     {
         public ABBR(params object[] contents) : base(contents) { }
@@ -117,6 +129,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class ACRONYM : HtmlTag
     {
         public ACRONYM(params object[] contents) : base(contents) { }
@@ -138,6 +151,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class ADDRESS : HtmlTag
     {
         public ADDRESS(params object[] contents) : base(contents) { }
@@ -159,6 +173,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class AREA : HtmlTag
     {
         public AREA(params object[] contents) : base(contents) { }
@@ -190,6 +205,7 @@ namespace RT.TagSoup.HtmlTags
         public string tabindex;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class B : HtmlTag
     {
         public B(params object[] contents) : base(contents) { }
@@ -211,6 +227,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class BASE : HtmlTag
     {
         public BASE(params object[] contents) : base(contents) { }
@@ -218,6 +235,7 @@ namespace RT.TagSoup.HtmlTags
         public override bool EndTag { get { return false; } }
         public string href;
     }
+    [RummageNoRenameAnything]
     public sealed class BDO : HtmlTag
     {
         public BDO(params object[] contents) : base(contents) { }
@@ -229,6 +247,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class BIG : HtmlTag
     {
         public BIG(params object[] contents) : base(contents) { }
@@ -250,6 +269,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class BLOCKQUOTE : HtmlTag
     {
         public BLOCKQUOTE(params object[] contents) : base(contents) { }
@@ -272,6 +292,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class BODY : HtmlTag
     {
         public BODY(params object[] contents) : base(contents) { }
@@ -297,6 +318,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class BR : HtmlTag
     {
         public BR(params object[] contents) : base(contents) { }
@@ -307,6 +329,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class BUTTON : HtmlTag
     {
         public BUTTON(params object[] contents) : base(contents) { }
@@ -337,6 +360,7 @@ namespace RT.TagSoup.HtmlTags
         public string value;
         public string target;
     }
+    [RummageNoRenameAnything]
     public sealed class CAPTION : HtmlTag
     {
         public CAPTION(params object[] contents) : base(contents) { }
@@ -358,6 +382,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class CITE : HtmlTag
     {
         public CITE(params object[] contents) : base(contents) { }
@@ -379,6 +404,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class CODE : HtmlTag
     {
         public CODE(params object[] contents) : base(contents) { }
@@ -400,6 +426,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class COL : HtmlTag
     {
         public COL(params object[] contents) : base(contents) { }
@@ -428,6 +455,7 @@ namespace RT.TagSoup.HtmlTags
         public valign valign;
         public string width;
     }
+    [RummageNoRenameAnything]
     public sealed class COLGROUP : HtmlTag
     {
         public COLGROUP(params object[] contents) : base(contents) { }
@@ -456,6 +484,7 @@ namespace RT.TagSoup.HtmlTags
         public valign valign;
         public string width;
     }
+    [RummageNoRenameAnything]
     public sealed class DD : HtmlTag
     {
         public DD(params object[] contents) : base(contents) { }
@@ -478,6 +507,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class DEL : HtmlTag
     {
         public DEL(params object[] contents) : base(contents) { }
@@ -501,6 +531,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class DFN : HtmlTag
     {
         public DFN(params object[] contents) : base(contents) { }
@@ -522,6 +553,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class DIV : HtmlTag
     {
         public DIV(params object[] contents) : base(contents) { }
@@ -543,6 +575,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class DL : HtmlTag
     {
         public DL(params object[] contents) : base(contents) { }
@@ -564,6 +597,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class DT : HtmlTag
     {
         public DT(params object[] contents) : base(contents) { }
@@ -586,6 +620,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class EM : HtmlTag
     {
         public EM(params object[] contents) : base(contents) { }
@@ -607,6 +642,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class FIELDSET : HtmlTag
     {
         public FIELDSET(params object[] contents) : base(contents) { }
@@ -628,6 +664,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class FORM : HtmlTag
     {
         public FORM(params object[] contents) : base(contents) { }
@@ -658,6 +695,7 @@ namespace RT.TagSoup.HtmlTags
         public string title;
         public string target;
     }
+    [RummageNoRenameAnything]
     public sealed class H1 : HtmlTag
     {
         public H1(params object[] contents) : base(contents) { }
@@ -679,6 +717,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class H2 : HtmlTag
     {
         public H2(params object[] contents) : base(contents) { }
@@ -700,6 +739,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class H3 : HtmlTag
     {
         public H3(params object[] contents) : base(contents) { }
@@ -721,6 +761,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class H4 : HtmlTag
     {
         public H4(params object[] contents) : base(contents) { }
@@ -742,6 +783,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class H5 : HtmlTag
     {
         public H5(params object[] contents) : base(contents) { }
@@ -763,6 +805,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class H6 : HtmlTag
     {
         public H6(params object[] contents) : base(contents) { }
@@ -784,6 +827,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class HEAD : HtmlTag
     {
         public HEAD(params object[] contents) : base(contents) { }
@@ -794,6 +838,7 @@ namespace RT.TagSoup.HtmlTags
         public string lang;
         public string profile;
     }
+    [RummageNoRenameAnything]
     public sealed class HR : HtmlTag
     {
         public HR(params object[] contents) : base(contents) { }
@@ -816,6 +861,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class HTML : HtmlTag
     {
         public HTML(params object[] contents) : base(contents) { }
@@ -826,6 +872,7 @@ namespace RT.TagSoup.HtmlTags
         public dir dir;
         public string lang;
     }
+    [RummageNoRenameAnything]
     public sealed class I : HtmlTag
     {
         public I(params object[] contents) : base(contents) { }
@@ -847,6 +894,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class IMG : HtmlTag
     {
         public IMG(params object[] contents) : base(contents) { }
@@ -877,6 +925,7 @@ namespace RT.TagSoup.HtmlTags
         public string usemap;
         public string width;
     }
+    [RummageNoRenameAnything]
     public sealed class INPUT : HtmlTag
     {
         public INPUT(params object[] contents) : base(contents) { }
@@ -920,6 +969,7 @@ namespace RT.TagSoup.HtmlTags
         public string accept;
         public string target;
     }
+    [RummageNoRenameAnything]
     public sealed class INS : HtmlTag
     {
         public INS(params object[] contents) : base(contents) { }
@@ -943,6 +993,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class KBD : HtmlTag
     {
         public KBD(params object[] contents) : base(contents) { }
@@ -964,6 +1015,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class LABEL : HtmlTag
     {
         public LABEL(params object[] contents) : base(contents) { }
@@ -989,6 +1041,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class LEGEND : HtmlTag
     {
         public LEGEND(params object[] contents) : base(contents) { }
@@ -1011,6 +1064,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class LI : HtmlTag
     {
         public LI(params object[] contents) : base(contents) { }
@@ -1033,6 +1087,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class LINK : HtmlTag
     {
         public LINK(params object[] contents) : base(contents) { }
@@ -1062,6 +1117,7 @@ namespace RT.TagSoup.HtmlTags
         public string title;
         public string type;
     }
+    [RummageNoRenameAnything]
     public sealed class MAP : HtmlTag
     {
         public MAP(params object[] contents) : base(contents) { }
@@ -1084,6 +1140,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class META : HtmlTag
     {
         public META(params object[] contents) : base(contents) { }
@@ -1096,6 +1153,7 @@ namespace RT.TagSoup.HtmlTags
         public string name;
         public string scheme;
     }
+    [RummageNoRenameAnything]
     public sealed class NOSCRIPT : HtmlTag
     {
         public NOSCRIPT(params object[] contents) : base(contents) { }
@@ -1117,6 +1175,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class OBJECT : HtmlTag
     {
         public OBJECT(params object[] contents) : base(contents) { }
@@ -1151,6 +1210,7 @@ namespace RT.TagSoup.HtmlTags
         public string usemap;
         public string width;
     }
+    [RummageNoRenameAnything]
     public sealed class OL : HtmlTag
     {
         public OL(params object[] contents) : base(contents) { }
@@ -1172,6 +1232,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class OPTGROUP : HtmlTag
     {
         public OPTGROUP(params object[] contents) : base(contents) { }
@@ -1195,6 +1256,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class OPTION : HtmlTag
     {
         public OPTION(params object[] contents) : base(contents) { }
@@ -1221,6 +1283,7 @@ namespace RT.TagSoup.HtmlTags
         public string title;
         public string value;
     }
+    [RummageNoRenameAnything]
     public sealed class P : HtmlTag
     {
         public P(params object[] contents) : base(contents) { }
@@ -1243,6 +1306,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class PARAM : HtmlTag
     {
         public PARAM(params object[] contents) : base(contents) { }
@@ -1254,6 +1318,7 @@ namespace RT.TagSoup.HtmlTags
         public string value;
         public valuetype valuetype;
     }
+    [RummageNoRenameAnything]
     public sealed class PRE : HtmlTag
     {
         public PRE(params object[] contents) : base(contents) { }
@@ -1275,6 +1340,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class Q : HtmlTag
     {
         public Q(params object[] contents) : base(contents) { }
@@ -1297,6 +1363,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class SAMP : HtmlTag
     {
         public SAMP(params object[] contents) : base(contents) { }
@@ -1318,6 +1385,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class SCRIPT : HtmlTag
     {
         public SCRIPT(params object[] contents) : base(contents) { }
@@ -1329,6 +1397,7 @@ namespace RT.TagSoup.HtmlTags
         public string src;
         public string type;
     }
+    [RummageNoRenameAnything]
     public sealed class SCRIPTLiteral : HtmlTag
     {
         public SCRIPTLiteral(string literal) : base() { Literal = literal; }
@@ -1341,6 +1410,7 @@ namespace RT.TagSoup.HtmlTags
             yield return @"</SCRIPT>";
         }
     }
+    [RummageNoRenameAnything]
     public sealed class SELECT : HtmlTag
     {
         public SELECT(params object[] contents) : base(contents) { }
@@ -1372,6 +1442,7 @@ namespace RT.TagSoup.HtmlTags
         public string tabindex;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class SMALL : HtmlTag
     {
         public SMALL(params object[] contents) : base(contents) { }
@@ -1393,6 +1464,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class SPAN : HtmlTag
     {
         public SPAN(params object[] contents) : base(contents) { }
@@ -1414,6 +1486,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class STRONG : HtmlTag
     {
         public STRONG(params object[] contents) : base(contents) { }
@@ -1435,6 +1508,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class STYLE : HtmlTag
     {
         public STYLE(params object[] contents) : base(contents) { }
@@ -1445,6 +1519,7 @@ namespace RT.TagSoup.HtmlTags
         public string title;
         public string type;
     }
+    [RummageNoRenameAnything]
     public sealed class STYLEImport : HtmlTag
     {
         public STYLEImport(string importFrom) : base() { ImportFrom = importFrom; }
@@ -1461,6 +1536,7 @@ namespace RT.TagSoup.HtmlTags
             yield return @""";</STYLE>";
         }
     }
+    [RummageNoRenameAnything]
     public sealed class STYLELiteral : HtmlTag
     {
         public STYLELiteral(string literal) : base() { Literal = literal; }
@@ -1473,6 +1549,7 @@ namespace RT.TagSoup.HtmlTags
             yield return @"</STYLE>";
         }
     }
+    [RummageNoRenameAnything]
     public sealed class SUB : HtmlTag
     {
         public SUB(params object[] contents) : base(contents) { }
@@ -1494,6 +1571,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class SUP : HtmlTag
     {
         public SUP(params object[] contents) : base(contents) { }
@@ -1515,6 +1593,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public class TABLE : HtmlTag
     {
         public TABLE(params object[] contents) : base(contents) { }
@@ -1542,6 +1621,7 @@ namespace RT.TagSoup.HtmlTags
         public string title;
         public string width;
     }
+    [RummageNoRenameAnything]
     public sealed class TBODY : HtmlTag
     {
         public TBODY(params object[] contents) : base(contents) { }
@@ -1569,6 +1649,7 @@ namespace RT.TagSoup.HtmlTags
         public string title;
         public valign valign;
     }
+    [RummageNoRenameAnything]
     public sealed class TD : HtmlTag
     {
         public TD(params object[] contents) : base(contents) { }
@@ -1602,6 +1683,7 @@ namespace RT.TagSoup.HtmlTags
         public valign valign;
         public string width;
     }
+    [RummageNoRenameAnything]
     public sealed class TEXTAREA : HtmlTag
     {
         public TEXTAREA(params object[] contents) : base(contents) { }
@@ -1634,6 +1716,7 @@ namespace RT.TagSoup.HtmlTags
         public string tabindex;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class TFOOT : HtmlTag
     {
         public TFOOT(params object[] contents) : base(contents) { }
@@ -1660,6 +1743,7 @@ namespace RT.TagSoup.HtmlTags
         public string title;
         public valign valign;
     }
+    [RummageNoRenameAnything]
     public sealed class TH : HtmlTag
     {
         public TH(params object[] contents) : base(contents) { }
@@ -1692,6 +1776,7 @@ namespace RT.TagSoup.HtmlTags
         public string title;
         public valign valign;
     }
+    [RummageNoRenameAnything]
     public sealed class THEAD : HtmlTag
     {
         public THEAD(params object[] contents) : base(contents) { }
@@ -1718,11 +1803,13 @@ namespace RT.TagSoup.HtmlTags
         public string title;
         public valign valign;
     }
+    [RummageNoRenameAnything]
     public sealed class TITLE : HtmlTag
     {
         public TITLE(params object[] contents) : base(contents) { }
         public override string TagName { get { return "TITLE"; } }
     }
+    [RummageNoRenameAnything]
     public sealed class TR : HtmlTag
     {
         public TR(params object[] contents) : base(contents) { }
@@ -1749,6 +1836,7 @@ namespace RT.TagSoup.HtmlTags
         public string title;
         public valign valign;
     }
+    [RummageNoRenameAnything]
     public sealed class TT : HtmlTag
     {
         public TT(params object[] contents) : base(contents) { }
@@ -1770,6 +1858,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class U : HtmlTag
     {
         public U(params object[] contents) : base(contents) { }
@@ -1791,6 +1880,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class UL : HtmlTag
     {
         public UL(params object[] contents) : base(contents) { }
@@ -1812,7 +1902,8 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
-    public class VAR : HtmlTag
+    [RummageNoRenameAnything]
+    public sealed class VAR : HtmlTag
     {
         public VAR(params object[] contents) : base(contents) { }
         public override string TagName { get { return "VAR"; } }
@@ -1833,6 +1924,7 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    [RummageNoRenameAnything]
     public sealed class WBR : HtmlTag
     {
         public WBR(params object[] contents) : base(contents) { }
