@@ -15,7 +15,6 @@ namespace RT.TagSoup
     public abstract class Tag
     {
         /// <summary>Remembers the contents of this tag.</summary>
-        [RummageNoRename]
         protected List<object> _tagContents = null;
 
         /// <summary>Name of the tag.</summary>

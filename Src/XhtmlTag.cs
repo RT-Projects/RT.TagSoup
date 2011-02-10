@@ -19,7 +19,6 @@ namespace RT.TagSoup.XhtmlTags
     public sealed class XhtmlTable : table
     {
         /// <summary>If set to a value other than null, causes all rows and cells within the generated table to have the specified CSS class.</summary>
-        [RummageNoRename]
         public string _AllClasses;
 
         /// <summary>Constructs an XHTML table in which all rows and cells have the same CSS class.</summary>
@@ -43,30 +42,18 @@ namespace RT.TagSoup.XhtmlTags
 
 #pragma warning disable 1591    // Missing XML comment for publicly visible type or member
 
-    [RummageNoRenameAnything]
     public enum align { _, left, center, right, justify, char_ }
-    [RummageNoRenameAnything]
     public enum btype { _, button, submit, reset }
-    [RummageNoRenameAnything]
     public enum dir { _, ltr, rtl }
-    [RummageNoRenameAnything]
     public enum frame { _, void_, above, below, hsides, lhs, rhs, vsides, box, border }
-    [RummageNoRenameAnything]
     public enum itype { _, text, password, checkbox, radio, submit, reset, file, hidden, image, button }
-    [RummageNoRenameAnything]
     public enum method { _, get, post }
-    [RummageNoRenameAnything]
     public enum rules { _, none, groups, rows, cols, all }
-    [RummageNoRenameAnything]
     public enum scope { _, row, col, rowgroup, colgroup }
-    [RummageNoRenameAnything]
     public enum shape { _, rect, circle, poly, default_ }
-    [RummageNoRenameAnything]
     public enum valign { _, top, middle, bottom, baseline }
-    [RummageNoRenameAnything]
     public enum valuetype { _, data, ref_, object_ }
 
-    [RummageNoRenameAnything]
     public sealed class a : XhtmlTag
     {
         public a(params object[] contents) : base(contents) { }
@@ -102,7 +89,6 @@ namespace RT.TagSoup.XhtmlTags
         public string type;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class abbr : XhtmlTag
     {
         public abbr(params object[] contents) : base(contents) { }
@@ -125,7 +111,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class acronym : XhtmlTag
     {
         public acronym(params object[] contents) : base(contents) { }
@@ -148,7 +133,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class address : XhtmlTag
     {
         public address(params object[] contents) : base(contents) { }
@@ -171,7 +155,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class area : XhtmlTag
     {
         public area(params object[] contents) : base(contents) { }
@@ -203,7 +186,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class b : XhtmlTag
     {
         public b(params object[] contents) : base(contents) { }
@@ -226,7 +208,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class base_ : XhtmlTag
     {
         public base_(params object[] contents) : base(contents) { }
@@ -234,7 +215,6 @@ namespace RT.TagSoup.XhtmlTags
         public string href;
         public string id;
     }
-    [RummageNoRenameAnything]
     public sealed class bdo : XhtmlTag
     {
         public bdo(params object[] contents) : base(contents) { }
@@ -257,7 +237,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class big : XhtmlTag
     {
         public big(params object[] contents) : base(contents) { }
@@ -280,7 +259,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class blockquote : XhtmlTag
     {
         public blockquote(params object[] contents) : base(contents) { }
@@ -304,7 +282,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class body : XhtmlTag
     {
         public body(params object[] contents) : base(contents) { }
@@ -329,7 +306,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class br : XhtmlTag
     {
         public br(params object[] contents) : base(contents) { }
@@ -339,7 +315,6 @@ namespace RT.TagSoup.XhtmlTags
         public string style;
         public string title;
     }
-    [RummageNoRenameAnything]
     public sealed class button : XhtmlTag
     {
         public button(params object[] contents) : base(contents) { }
@@ -370,7 +345,6 @@ namespace RT.TagSoup.XhtmlTags
         public string value;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class caption : XhtmlTag
     {
         public caption(params object[] contents) : base(contents) { }
@@ -393,7 +367,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class cite : XhtmlTag
     {
         public cite(params object[] contents) : base(contents) { }
@@ -416,7 +389,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class code : XhtmlTag
     {
         public code(params object[] contents) : base(contents) { }
@@ -439,7 +411,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class col : XhtmlTag
     {
         public col(params object[] contents) : base(contents) { }
@@ -468,7 +439,6 @@ namespace RT.TagSoup.XhtmlTags
         public string width;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class colgroup : XhtmlTag
     {
         public colgroup(params object[] contents) : base(contents) { }
@@ -497,7 +467,6 @@ namespace RT.TagSoup.XhtmlTags
         public string width;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class dd : XhtmlTag
     {
         public dd(params object[] contents) : base(contents) { }
@@ -520,7 +489,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class del : XhtmlTag
     {
         public del(params object[] contents) : base(contents) { }
@@ -545,7 +513,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class dfn : XhtmlTag
     {
         public dfn(params object[] contents) : base(contents) { }
@@ -568,7 +535,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class div : XhtmlTag
     {
         public div(params object[] contents) : base(contents) { }
@@ -591,7 +557,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class dl : XhtmlTag
     {
         public dl(params object[] contents) : base(contents) { }
@@ -614,7 +579,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class dt : XhtmlTag
     {
         public dt(params object[] contents) : base(contents) { }
@@ -637,7 +601,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class em : XhtmlTag
     {
         public em(params object[] contents) : base(contents) { }
@@ -660,7 +623,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class fieldset : XhtmlTag
     {
         public fieldset(params object[] contents) : base(contents) { }
@@ -683,7 +645,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class form : XhtmlTag
     {
         public form(params object[] contents) : base(contents) { }
@@ -713,7 +674,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class h1 : XhtmlTag
     {
         public h1(params object[] contents) : base(contents) { }
@@ -736,7 +696,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class h2 : XhtmlTag
     {
         public h2(params object[] contents) : base(contents) { }
@@ -759,7 +718,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class h3 : XhtmlTag
     {
         public h3(params object[] contents) : base(contents) { }
@@ -782,7 +740,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class h4 : XhtmlTag
     {
         public h4(params object[] contents) : base(contents) { }
@@ -805,7 +762,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class h5 : XhtmlTag
     {
         public h5(params object[] contents) : base(contents) { }
@@ -828,7 +784,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class h6 : XhtmlTag
     {
         public h6(params object[] contents) : base(contents) { }
@@ -851,7 +806,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class head : XhtmlTag
     {
         public head(params object[] contents) : base(contents) { }
@@ -862,7 +816,6 @@ namespace RT.TagSoup.XhtmlTags
         public string profile;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class hr : XhtmlTag
     {
         public hr(params object[] contents) : base(contents) { }
@@ -885,7 +838,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class html : XhtmlTag
     {
         public html(params object[] contents) : base(contents) { }
@@ -897,7 +849,6 @@ namespace RT.TagSoup.XhtmlTags
         public string xmlLang;
         public string xmlns = "http://www.w3.org/1999/xhtml";
     }
-    [RummageNoRenameAnything]
     public sealed class i : XhtmlTag
     {
         public i(params object[] contents) : base(contents) { }
@@ -920,7 +871,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class img : XhtmlTag
     {
         public img(params object[] contents) : base(contents) { }
@@ -950,7 +900,6 @@ namespace RT.TagSoup.XhtmlTags
         public string width;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class input : XhtmlTag
     {
         public input(params object[] contents) : base(contents) { }
@@ -993,7 +942,6 @@ namespace RT.TagSoup.XhtmlTags
         public string value;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class ins : XhtmlTag
     {
         public ins(params object[] contents) : base(contents) { }
@@ -1018,7 +966,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class kbd : XhtmlTag
     {
         public kbd(params object[] contents) : base(contents) { }
@@ -1041,7 +988,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class label : XhtmlTag
     {
         public label(params object[] contents) : base(contents) { }
@@ -1068,7 +1014,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class legend : XhtmlTag
     {
         public legend(params object[] contents) : base(contents) { }
@@ -1092,7 +1037,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class li : XhtmlTag
     {
         public li(params object[] contents) : base(contents) { }
@@ -1115,7 +1059,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class link : XhtmlTag
     {
         public link(params object[] contents) : base(contents) { }
@@ -1145,7 +1088,6 @@ namespace RT.TagSoup.XhtmlTags
         public string type;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class map : XhtmlTag
     {
         public map(params object[] contents) : base(contents) { }
@@ -1169,7 +1111,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class meta : XhtmlTag
     {
         public meta(params object[] contents) : base(contents) { }
@@ -1183,7 +1124,6 @@ namespace RT.TagSoup.XhtmlTags
         public string scheme;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class noscript : XhtmlTag
     {
         public noscript(params object[] contents) : base(contents) { }
@@ -1206,7 +1146,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class object_ : XhtmlTag
     {
         public object_(params object[] contents) : base(contents) { }
@@ -1242,7 +1181,6 @@ namespace RT.TagSoup.XhtmlTags
         public string width;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class ol : XhtmlTag
     {
         public ol(params object[] contents) : base(contents) { }
@@ -1265,7 +1203,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class optgroup : XhtmlTag
     {
         public optgroup(params object[] contents) : base(contents) { }
@@ -1290,7 +1227,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class option : XhtmlTag
     {
         public option(params object[] contents) : base(contents) { }
@@ -1317,7 +1253,6 @@ namespace RT.TagSoup.XhtmlTags
         public string value;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class p : XhtmlTag
     {
         public p(params object[] contents) : base(contents) { }
@@ -1340,7 +1275,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class param : XhtmlTag
     {
         public param(params object[] contents) : base(contents) { }
@@ -1351,7 +1285,6 @@ namespace RT.TagSoup.XhtmlTags
         public string value;
         public valuetype valuetype;
     }
-    [RummageNoRenameAnything]
     public sealed class pre : XhtmlTag
     {
         public pre(params object[] contents) : base(contents) { }
@@ -1374,7 +1307,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class q : XhtmlTag
     {
         public q(params object[] contents) : base(contents) { }
@@ -1398,7 +1330,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class samp : XhtmlTag
     {
         public samp(params object[] contents) : base(contents) { }
@@ -1421,7 +1352,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class script : XhtmlTag
     {
         public script(params object[] contents) : base(contents) { }
@@ -1432,7 +1362,6 @@ namespace RT.TagSoup.XhtmlTags
         public string src;
         public string type;
     }
-    [RummageNoRenameAnything]
     public sealed class select : XhtmlTag
     {
         public select(params object[] contents) : base(contents) { }
@@ -1463,7 +1392,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class small : XhtmlTag
     {
         public small(params object[] contents) : base(contents) { }
@@ -1486,7 +1414,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class span : XhtmlTag
     {
         public span(params object[] contents) : base(contents) { }
@@ -1509,7 +1436,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class strong : XhtmlTag
     {
         public strong(params object[] contents) : base(contents) { }
@@ -1532,7 +1458,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class style : XhtmlTag
     {
         public style(params object[] contents) : base(contents) { }
@@ -1545,7 +1470,6 @@ namespace RT.TagSoup.XhtmlTags
         public string type;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class styleImport : XhtmlTag
     {
         public styleImport(params object[] contents) : base(contents) { }
@@ -1561,7 +1485,6 @@ namespace RT.TagSoup.XhtmlTags
             yield return @"""; /*]]>*/</style>";
         }
     }
-    [RummageNoRenameAnything]
     public sealed class sub : XhtmlTag
     {
         public sub(params object[] contents) : base(contents) { }
@@ -1584,7 +1507,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class sup : XhtmlTag
     {
         public sup(params object[] contents) : base(contents) { }
@@ -1607,7 +1529,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public class table : XhtmlTag
     {
         public table(params object[] contents) : base(contents) { }
@@ -1637,7 +1558,6 @@ namespace RT.TagSoup.XhtmlTags
         public string width;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class tbody : XhtmlTag
     {
         public tbody(params object[] contents) : base(contents) { }
@@ -1664,7 +1584,6 @@ namespace RT.TagSoup.XhtmlTags
         public valign valign;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class td : XhtmlTag
     {
         public td(params object[] contents) : base(contents) { }
@@ -1697,7 +1616,6 @@ namespace RT.TagSoup.XhtmlTags
         public valign valign;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class textarea : XhtmlTag
     {
         public textarea(params object[] contents) : base(contents) { }
@@ -1731,7 +1649,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class tfoot : XhtmlTag
     {
         public tfoot(params object[] contents) : base(contents) { }
@@ -1758,7 +1675,6 @@ namespace RT.TagSoup.XhtmlTags
         public valign valign;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class th : XhtmlTag
     {
         public th(params object[] contents) : base(contents) { }
@@ -1791,7 +1707,6 @@ namespace RT.TagSoup.XhtmlTags
         public valign valign;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class thead : XhtmlTag
     {
         public thead(params object[] contents) : base(contents) { }
@@ -1818,7 +1733,6 @@ namespace RT.TagSoup.XhtmlTags
         public valign valign;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class title : XhtmlTag
     {
         public title(params object[] contents) : base(contents) { }
@@ -1828,7 +1742,6 @@ namespace RT.TagSoup.XhtmlTags
         public string lang;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class tr : XhtmlTag
     {
         public tr(params object[] contents) : base(contents) { }
@@ -1855,7 +1768,6 @@ namespace RT.TagSoup.XhtmlTags
         public valign valign;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class tt : XhtmlTag
     {
         public tt(params object[] contents) : base(contents) { }
@@ -1878,7 +1790,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class ul : XhtmlTag
     {
         public ul(params object[] contents) : base(contents) { }
@@ -1901,7 +1812,6 @@ namespace RT.TagSoup.XhtmlTags
         public string title;
         public string xmlLang;
     }
-    [RummageNoRenameAnything]
     public sealed class var_ : XhtmlTag
     {
         public var_(params object[] contents) : base(contents) { }
