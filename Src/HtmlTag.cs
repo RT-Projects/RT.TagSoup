@@ -16,7 +16,7 @@ namespace RT.TagSoup.HtmlTags
         /// <param name="title">Title to use in the &lt;TITLE&gt; tag in the head.</param>
         /// <param name="bodyContent">Contents of the &lt;BODY&gt; tag.</param>
         /// <returns>An <see cref="HtmlTag"/> representing the entire HTML document.</returns>
-        public static HtmlTag HtmlDocument(object title, params object[] bodyContent) { return new HTML(new HEAD(new TITLE(title)), new BODY(bodyContent)); }
+        public static HtmlTag HtmlDocument(object title, params object[] bodyContent) { return new HTML(new HEAD(new TITLE(title), new META { http_equiv = "Content-type", content = "text/html; charset=utf-8" }), new BODY(bodyContent)); }
     }
 
     /// <summary>Special class to help construct an HTML <c>&lt;TABLE&gt;</c> element
