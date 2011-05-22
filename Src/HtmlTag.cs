@@ -1295,6 +1295,27 @@ namespace RT.TagSoup.HtmlTags
         public string style;
         public string title;
     }
+    public sealed class S : HtmlTag
+    {
+        public S(params object[] contents) : base(contents) { }
+        public override string TagName { get { return "S"; } }
+        public string class_;
+        public dir dir;
+        public string id;
+        public string lang;
+        public string onclick;
+        public string ondblclick;
+        public string onkeydown;
+        public string onkeypress;
+        public string onkeyup;
+        public string onmousedown;
+        public string onmousemove;
+        public string onmouseout;
+        public string onmouseover;
+        public string onmouseup;
+        public string style;
+        public string title;
+    }
     public sealed class SAMP : HtmlTag
     {
         public SAMP(params object[] contents) : base(contents) { }
