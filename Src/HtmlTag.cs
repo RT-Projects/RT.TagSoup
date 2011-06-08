@@ -1599,7 +1599,7 @@ namespace RT.TagSoup.HtmlTags
         public string char_;
         public string charoff;
         public string class_;
-        public string colspan;
+        public int colspan;
         public dir dir;
         public string headers;
         public string id;
@@ -1614,7 +1614,7 @@ namespace RT.TagSoup.HtmlTags
         public string onmouseout;
         public string onmouseover;
         public string onmouseup;
-        public string rowspan;
+        public int rowspan;
         public scope scope;
         public string style;
         public string title;
@@ -1690,7 +1690,7 @@ namespace RT.TagSoup.HtmlTags
         public string char_;
         public string charoff;
         public string class_;
-        public string colspan;
+        public int colspan;
         public dir dir;
         public string headers;
         public string id;
@@ -1705,7 +1705,7 @@ namespace RT.TagSoup.HtmlTags
         public string onmouseout;
         public string onmouseover;
         public string onmouseup;
-        public string rowspan;
+        public int rowspan;
         public scope scope;
         public string style;
         public string title;
