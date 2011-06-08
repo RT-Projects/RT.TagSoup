@@ -917,6 +917,7 @@ namespace RT.TagSoup.HtmlTags
         public string onchange;
         public string accept;
         public string target;
+        public string autocomplete;
     }
     public sealed class INS : HtmlTag
     {
@@ -1599,7 +1600,7 @@ namespace RT.TagSoup.HtmlTags
         public string char_;
         public string charoff;
         public string class_;
-        public int colspan;
+        public int? colspan;
         public dir dir;
         public string headers;
         public string id;
@@ -1614,7 +1615,7 @@ namespace RT.TagSoup.HtmlTags
         public string onmouseout;
         public string onmouseover;
         public string onmouseup;
-        public int rowspan;
+        public int? rowspan;
         public scope scope;
         public string style;
         public string title;
@@ -1690,7 +1691,7 @@ namespace RT.TagSoup.HtmlTags
         public string char_;
         public string charoff;
         public string class_;
-        public int colspan;
+        public int? colspan;
         public dir dir;
         public string headers;
         public string id;
@@ -1705,7 +1706,7 @@ namespace RT.TagSoup.HtmlTags
         public string onmouseout;
         public string onmouseover;
         public string onmouseup;
-        public int rowspan;
+        public int? rowspan;
         public scope scope;
         public string style;
         public string title;
