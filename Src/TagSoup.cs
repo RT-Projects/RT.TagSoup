@@ -54,6 +54,16 @@ namespace RT.TagSoup
             return this;
         }
 
+        private Dictionary<string, object> _data;
+
+        public Tag Data(string key, object value)
+        {
+            if (_data == null)
+                _data = new Dictionary<string, object>();
+            _data[key] = value;
+            return this;
+        }
+
         /// <summary>Adds stuff at the end of the contents of this tag (a string, a tag, a collection of strings or of tags).</summary>
         /// <param name="content">The stuff to add.</param>
         public void Add(object content) { _tagContents.Add(content); }
@@ -98,6 +108,17 @@ namespace RT.TagSoup
                 else
                     yield return " " + fixFieldName(field.Name) + "=\"" + valStr.HtmlEscape() + "\"";
             }
+            if (_data != null)
+                foreach (var kvp in _data)
+                {
+                    for (int i = 0; i < kvp.Key.Length; i++)
+                    {
+                        var ch = kvp.Key[i];
+                        if (ch != '-' && ch != '_' && (ch < '0' || ch > '9') && (ch < 'A' || ch > 'Z') && (ch < 'a' || ch > 'z'))
+                            throw new InvalidOperationException("data attribute name cannot contain character “{0}”.".Fmt(ch));
+                    }
+                    yield return " data-" + kvp.Key + "=\"" + kvp.Value.ToString().HtmlEscape() + "\"";
+                }
             if (tagPrinted && AllowXhtmlEmpty && (_tagContents == null || _tagContents.Count == 0))
             {
                 yield return "/>";
