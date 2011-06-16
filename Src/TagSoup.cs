@@ -146,7 +146,7 @@ namespace RT.TagSoup
                     IEnumerator<string> en = null;
                     try
                     {
-                        try { en = stringify(content).GetEnumerator(); }
+                        try { en = ToEnumerable(content).GetEnumerator(); }
                         catch (Exception e) { toThrow = e; }
                         while (toThrow == null)
                         {
@@ -186,37 +186,37 @@ namespace RT.TagSoup
         public static string ToString(object tagTree, bool htmlEscape = true)
         {
             StringBuilder sb = new StringBuilder();
-            foreach (string s in stringify(tagTree, htmlEscape))
+            foreach (string s in ToEnumerable(tagTree, htmlEscape))
                 sb.Append(s);
             return sb.ToString();
         }
 
-        private static IEnumerable<string> Empty = Enumerable.Empty<string>();
-
-        private static IEnumerable<string> stringify(object o, bool htmlEscape = true)
+        /// <summary>Converts a tag tree into a string that is generated bit by bit.</summary>
+        /// <returns>A collection that generates the entire tag tree as a string.</returns>
+        public static IEnumerable<string> ToEnumerable(object tagTree, bool htmlEscape = true)
         {
-            if (o == null)
-                return Empty;
+            if (tagTree == null)
+                return Enumerable.Empty<string>();
 
-            if (o is string)
-                return new[] { htmlEscape ? ((string) o).HtmlEscape() : (string) o };
+            if (tagTree is string)
+                return new[] { htmlEscape ? ((string) tagTree).HtmlEscape() : (string) tagTree };
 
-            if (o is IEnumerable<string>)
+            if (tagTree is IEnumerable<string>)
             {
-                var e = ((IEnumerable<string>) o);
+                var e = ((IEnumerable<string>) tagTree);
                 return htmlEscape ? e.Select(str => str.HtmlEscape()) : e;
             }
 
-            if (o is Tag)
-                return ((Tag) o).ToEnumerable();
+            if (tagTree is Tag)
+                return ((Tag) tagTree).ToEnumerable();
 
-            if (o is IEnumerable)
-                return ((IEnumerable) o).Cast<object>().SelectMany(s => stringify(s, htmlEscape));
+            if (tagTree is IEnumerable)
+                return ((IEnumerable) tagTree).Cast<object>().SelectMany(s => ToEnumerable(s, htmlEscape));
 
-            if (o is Delegate && ((Delegate) o).Method.GetParameters().Length == 0)
-                return stringify(((Delegate) o).DynamicInvoke(null), htmlEscape);
+            if (tagTree is Delegate && ((Delegate) tagTree).Method.GetParameters().Length == 0)
+                return ToEnumerable(((Delegate) tagTree).DynamicInvoke(null), htmlEscape);
 
-            return new[] { htmlEscape ? o.ToString().HtmlEscape() : o.ToString() };
+            return new[] { htmlEscape ? tagTree.ToString().HtmlEscape() : tagTree.ToString() };
         }
 
         /// <summary>Converts a C#-compatible field name into an HTML/XHTML-compatible one.</summary>
@@ -232,7 +232,7 @@ namespace RT.TagSoup
         /// <returns>Converted field name.</returns>
         private static string fixFieldName(string fn)
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder(fn.Length);
             for (int i = 0; i < fn.Length; i++)
                 if (fn[i] >= 'A' && fn[i] <= 'Z')
                     sb.Append(":" + char.ToLowerInvariant(fn[i]));
