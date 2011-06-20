@@ -58,6 +58,8 @@ namespace RT.TagSoup
 
         public Tag Data(string key, object value)
         {
+            if (value == null)
+                return this;
             if (_data == null)
                 _data = new Dictionary<string, object>();
             _data[key] = value;
