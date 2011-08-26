@@ -820,7 +820,7 @@ namespace RT.TagSoup.HtmlTags
         public override string TagName { get { return "HTML"; } }
         public override bool StartTag { get { return false; } }
         public override bool EndTag { get { return false; } }
-        public override string DocType { get { return @"<!DOCTYPE HTML PUBLIC ""-//W3C//DTD HTML 4.01//EN"" ""http://www.w3.org/TR/html4/strict.dtd"">"; } }
+        public override string DocType { get { return @"<!DOCTYPE html>"; } }
         public dir dir;
         public string lang;
     }
