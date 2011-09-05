@@ -8,8 +8,8 @@ namespace RT.TagSoup.HtmlTags
     public abstract class HtmlTag : Tag
     {
         /// <summary>Constructs an HTML tag.</summary>
-        /// <param name="Contents">Contents of the tag.</param>
-        public HtmlTag(params object[] Contents) { _tagContents = new List<object>(Contents); }
+        /// <param name="contents">Contents of the tag.</param>
+        public HtmlTag(params object[] contents) { _tagContents = new List<object>(contents); }
         /// <summary>Returns false.</summary>
         public override bool AllowXhtmlEmpty { get { return false; } }
         /// <summary>Creates a simple HTML document from the specified elements.</summary>
@@ -24,7 +24,7 @@ namespace RT.TagSoup.HtmlTags
     public sealed class HtmlTable : TABLE
     {
         /// <summary>If set to a value other than null, causes all rows and cells within the generated table to have the specified CSS class.</summary>
-        public string _AllClasses;
+        public string _allClasses;
 
         /// <summary>Constructs an HTML table in which all rows and cells have the same CSS class.</summary>
         /// <param name="classOnAllTags">Optional. If non-null, all rows and cells within the generated table have the specified CSS class.</param>
