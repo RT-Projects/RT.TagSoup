@@ -185,40 +185,40 @@ namespace RT.TagSoup
 
         /// <summary>Converts a tag tree into a single string.</summary>
         /// <returns>The entire tag tree as a single string.</returns>
-        public static string ToString(object tagTree, bool htmlEscape = true)
+        public static string ToString(object tagTree)
         {
             StringBuilder sb = new StringBuilder();
-            foreach (string s in ToEnumerable(tagTree, htmlEscape))
+            foreach (string s in ToEnumerable(tagTree))
                 sb.Append(s);
             return sb.ToString();
         }
 
         /// <summary>Converts a tag tree into a string that is generated bit by bit.</summary>
         /// <returns>A collection that generates the entire tag tree as a string.</returns>
-        public static IEnumerable<string> ToEnumerable(object tagTree, bool htmlEscape = true)
+        public static IEnumerable<string> ToEnumerable(object tagTree)
         {
             if (tagTree == null)
                 return Enumerable.Empty<string>();
 
             if (tagTree is string)
-                return new[] { htmlEscape ? ((string) tagTree).HtmlEscape() : (string) tagTree };
+                return new[] { ((string) tagTree).HtmlEscape() };
 
             if (tagTree is IEnumerable<string>)
             {
                 var e = ((IEnumerable<string>) tagTree);
-                return htmlEscape ? e.Select(str => str.HtmlEscape()) : e;
+                return e.Select(str => str.HtmlEscape());
             }
 
             if (tagTree is Tag)
                 return ((Tag) tagTree).ToEnumerable();
 
             if (tagTree is IEnumerable)
-                return ((IEnumerable) tagTree).Cast<object>().SelectMany(s => ToEnumerable(s, htmlEscape));
+                return ((IEnumerable) tagTree).Cast<object>().SelectMany(ToEnumerable);
 
             if (tagTree is Delegate && ((Delegate) tagTree).Method.GetParameters().Length == 0)
-                return ToEnumerable(((Delegate) tagTree).DynamicInvoke(null), htmlEscape);
+                return ToEnumerable(((Delegate) tagTree).DynamicInvoke(null));
 
-            return new[] { htmlEscape ? tagTree.ToString().HtmlEscape() : tagTree.ToString() };
+            return new[] { tagTree.ToString().HtmlEscape() };
         }
 
         /// <summary>Converts a C#-compatible field name into an HTML/XHTML-compatible one.</summary>
