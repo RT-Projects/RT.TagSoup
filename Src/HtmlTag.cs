@@ -9,7 +9,7 @@ namespace RT.TagSoup.HtmlTags
     {
         /// <summary>Constructs an HTML tag.</summary>
         /// <param name="contents">Contents of the tag.</param>
-        public HtmlTag(params object[] contents) { _tagContents = new List<object>(contents); }
+        public HtmlTag(params object[] contents) { _tagContents = contents == null ? new List<object>() : new List<object>(contents); }
         /// <summary>Returns false.</summary>
         public override bool AllowXhtmlEmpty { get { return false; } }
         /// <summary>Creates a simple HTML document from the specified elements.</summary>
