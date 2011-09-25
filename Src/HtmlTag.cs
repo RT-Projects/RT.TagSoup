@@ -537,6 +537,7 @@ namespace RT.TagSoup.HtmlTags
         public override string TagName { get { return "html"; } }
         public override bool StartTag { get { return false; } }
         public override bool EndTag { get { return false; } }
+        public override string DocType { get { return "<!DOCTYPE html>"; } }
         public string manifest;
     }
     public sealed class I : HtmlTag
