@@ -7,37 +7,12 @@ namespace RT.TagSoup.XhtmlTags
     /// <summary>Abstract base class for XHTML tags.</summary>
     public abstract class XhtmlTag : Tag
     {
-        /// <summary>Constructs an XHTML tag.</summary>
-        /// <param name="contents">Contents of the tag.</param>
-        public XhtmlTag(params object[] contents) { _tagContents = new List<object>(contents); }
+        /// <summary>Constructor.</param>
+        public XhtmlTag() : base() { }
+        /// <summary>Constructor.</param>
+        public XhtmlTag(params object[] contents) : base(contents) { }
         /// <summary>Returns true.</summary>
         public override bool AllowXhtmlEmpty { get { return true; } }
-    }
-
-    /// <summary>Special class to help construct an XHTML <c>&lt;table&gt;</c> element
-    /// without needing to instantiate all intermediate row and cell tags.</summary>
-    public sealed class XhtmlTable : table
-    {
-        /// <summary>If set to a value other than null, causes all rows and cells within the generated table to have the specified CSS class.</summary>
-        public string _AllClasses;
-
-        /// <summary>Constructs an XHTML table in which all rows and cells have the same CSS class.</summary>
-        /// <param name="classOnAllTags">Optional. If non-null, all rows and cells within the generated table have the specified CSS class.</param>
-        /// <param name="rows">Rows (arrays of cell contents).</param>
-        public XhtmlTable(string classOnAllTags, params object[][] rows)
-        {
-            if (classOnAllTags != null)
-                class_ = classOnAllTags;
-            List<object> rowTags = new List<object>();
-            foreach (object[] row in rows)
-            {
-                List<object> cellTags = new List<object>();
-                foreach (object cell in row)
-                    cellTags.Add(classOnAllTags == null ? new td(cell) : new td(cell) { class_ = classOnAllTags });
-                rowTags.Add(classOnAllTags == null ? new tr(cellTags.ToArray()) : new tr(cellTags.ToArray()) { class_ = classOnAllTags });
-            }
-            _tagContents = rowTags;
-        }
     }
 
 #pragma warning disable 1591    // Missing XML comment for publicly visible type or member

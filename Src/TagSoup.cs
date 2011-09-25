@@ -16,19 +16,21 @@ namespace RT.TagSoup
     ///         <item><term><c>string</c></term><description>outputs that string (HTML-escaped, of course)</description></item>
     ///         <item><term><c>Tag</c></term><description>outputs that tag and its contents</description></item>
     ///         <item><term><c>IEnumerable&lt;T&gt;</c></term><description>enumerates all contained objects and recursively processes them individually</description></item>
-    ///         <item><term><c>Func&lt;T&gt;</c></term><description>calls the function and recursively processes the return value</description></item>
+    ///         <item><term><c>Func&lt;T&gt;</c> (or any other delegate with no parameters)</term><description>calls the delegate and recursively processes the return value</description></item>
     ///     </list>
-    ///     <para>Using lazy-evaluated IEnumerable&lt;T&gt;s and functions of type <c>Func&lt;T&gt;</c> is a convenient way to defer execution to ensure maximally responsive output.</para>
+    ///     <para>Using lazy-evaluated IEnumerable&lt;T&gt;s and/or delegates is a convenient way to defer execution to ensure maximally responsive output.</para>
     /// </remarks>
     public abstract class Tag
     {
         /// <summary>Remembers the contents of this tag.</summary>
-        protected List<object> _tagContents = null;
+        private IEnumerable _tagContents = null;
 
         /// <summary>Constructor.</summary>
         public Tag() { _tagContents = null; }
         /// <summary>Constructor.</summary>
-        public Tag(object[] contents) { _tagContents = contents == null ? null : new List<object>(contents); }
+        public Tag(object[] contents) { _tagContents = contents; }
+        /// <summary>Constructor.</summary>
+        public Tag(IEnumerable contents) { _tagContents = contents; }
 
         /// <summary>Name of the tag.</summary>
         public abstract string TagName { get; }
@@ -46,7 +48,16 @@ namespace RT.TagSoup
         /// <returns>The same tag.</returns>
         public Tag _(params object[] contents)
         {
-            _tagContents = contents == null ? null : new List<object>(contents);
+            _tagContents = contents;
+            return this;
+        }
+
+        /// <summary>Sets the contents of the tag. Any objects are allowed.</summary>
+        /// <param name="contents">Contents to set to.</param>
+        /// <returns>The same tag.</returns>
+        public Tag _(IEnumerable contents)
+        {
+            _tagContents = contents;
             return this;
         }
 
@@ -63,8 +74,12 @@ namespace RT.TagSoup
         /// <param name="content">The stuff to add.</param>
         public void Add(object content)
         {
-            if (content != null)
-                (_tagContents ?? (_tagContents = new List<object>())).Add(content);
+            if (_tagContents == null)
+                _tagContents = new List<object>();
+            if (!(_tagContents is List<object>))
+                _tagContents = _tagContents.Cast<object>().ToList();
+
+            ((List<object>) _tagContents).Add(content);
         }
 
         /// <summary>Outputs this tag and all its contents.</summary>
@@ -105,7 +120,9 @@ namespace RT.TagSoup
                 else
                     yield return " " + fixFieldName(field.Name) + "=\"" + val.ToString().HtmlEscape() + "\"";
             }
+
             if (_data != null)
+            {
                 foreach (var kvp in _data)
                 {
                     for (int i = 0; i < kvp.Key.Length; i++)
@@ -116,57 +133,45 @@ namespace RT.TagSoup
                     }
                     yield return " data-" + kvp.Key + "=\"" + kvp.Value.ToString().HtmlEscape() + "\"";
                 }
-            if (tagPrinted && AllowXhtmlEmpty && (_tagContents == null || _tagContents.Count == 0))
+            }
+
+            var tagIncomplete = tagPrinted;
+            Exception toThrow = null;
+            IEnumerator<string> enumerator = null;
+            try { enumerator = Tag.ToEnumerable(_tagContents).GetEnumerator(); }
+            catch (Exception e) { toThrow = e; }
+            while (toThrow == null)
+            {
+                try
+                {
+                    if (!enumerator.MoveNext())
+                        break;
+                }
+                catch (Exception e)
+                {
+                    toThrow = e;
+                    break;
+                }
+
+                if (tagIncomplete)
+                {
+                    yield return ">";
+                    tagIncomplete = false;
+                }
+                yield return enumerator.Current;
+            }
+
+            if (tagIncomplete && AllowXhtmlEmpty && EndTag)
             {
                 yield return "/>";
                 yield break;
             }
-            if (tagPrinted)
+            else if (tagIncomplete)
                 yield return ">";
-            Exception toThrow = null;
-            if (_tagContents != null)
-            {
-                foreach (object content in _tagContents)
-                {
-                    if (content == null)
-                        continue;
-                    if (content is string)
-                        yield return ((string) content).HtmlEscape();
-                    else if (content is Func<string>)
-                    {
-                        string result = null;
-                        try { result = ((Func<string>) content)().HtmlEscape(); }
-                        catch (Exception e) { toThrow = e; }
-                        if (toThrow == null && result != null)
-                            yield return result;
-                    }
-                    else
-                    {
-                        IEnumerator<string> en = null;
-                        try
-                        {
-                            try { en = ToEnumerable(content).GetEnumerator(); }
-                            catch (Exception e) { toThrow = e; }
-                            while (toThrow == null)
-                            {
-                                bool hasNext = false;
-                                try { hasNext = en.MoveNext(); }
-                                catch (Exception e) { toThrow = e; }
-                                if (!hasNext)
-                                    break;
-                                yield return en.Current;
-                            }
-                        }
-                        finally
-                        {
-                            if (en != null)
-                                ((IDisposable) en).Dispose();
-                        }
-                    }
-                }
-            }
+
             if (EndTag)
                 yield return "</" + TagName + ">";
+
             if (toThrow != null)
                 throw new TagSoupDeferredException(toThrow);
         }
@@ -202,10 +207,7 @@ namespace RT.TagSoup
                 return new[] { ((string) tagTree).HtmlEscape() };
 
             if (tagTree is IEnumerable<string>)
-            {
-                var e = ((IEnumerable<string>) tagTree);
-                return e.Select(str => str.HtmlEscape());
-            }
+                return ((IEnumerable<string>) tagTree).Select(StringExtensions.HtmlEscape);
 
             if (tagTree is Tag)
                 return ((Tag) tagTree).ToEnumerable();

@@ -185,6 +185,7 @@ namespace RT.TagSoup.HtmlTags
         public AREA() : base(null) { }
         public AREA(params object[] contents) : base(contents) { }
         public override string TagName { get { return "area"; } }
+        public override bool EndTag { get { return false; } }
         public string alt;
         public int[] coords;
         public shape shape;
@@ -233,6 +234,7 @@ namespace RT.TagSoup.HtmlTags
         public BASE() : base(null) { }
         public BASE(params object[] contents) : base(contents) { }
         public override string TagName { get { return "base"; } }
+        public override bool EndTag { get { return false; } }
         public string href;
         public string target;
     }
@@ -281,6 +283,7 @@ namespace RT.TagSoup.HtmlTags
         public BR() : base(null) { }
         public BR(params object[] contents) : base(contents) { }
         public override string TagName { get { return "br"; } }
+        public override bool EndTag { get { return false; } }
     }
     public sealed class BUTTON : HtmlTag
     {
@@ -330,6 +333,7 @@ namespace RT.TagSoup.HtmlTags
         public COL() : base(null) { }
         public COL(params object[] contents) : base(contents) { }
         public override string TagName { get { return "col"; } }
+        public override bool EndTag { get { return false; } }
         public int? span;
     }
     public sealed class COLGROUP : HtmlTag
@@ -345,6 +349,7 @@ namespace RT.TagSoup.HtmlTags
         public COMMAND() : base(null) { }
         public COMMAND(params object[] contents) : base(contents) { }
         public override string TagName { get { return "command"; } }
+        public override bool EndTag { get { return false; } }
         public ctype type;
         public string label;
         public string icon;
@@ -416,6 +421,7 @@ namespace RT.TagSoup.HtmlTags
         public EMBED() : base(null) { }
         public EMBED(params object[] contents) : base(contents) { }
         public override string TagName { get { return "embed"; } }
+        public override bool EndTag { get { return false; } }
         public string src;
         public string type;
         public int? width;
@@ -522,6 +528,7 @@ namespace RT.TagSoup.HtmlTags
         public HR() : base(null) { }
         public HR(params object[] contents) : base(contents) { }
         public override string TagName { get { return "hr"; } }
+        public override bool EndTag { get { return false; } }
     }
     public sealed class HTML : HtmlTag
     {
@@ -556,6 +563,7 @@ namespace RT.TagSoup.HtmlTags
         public IMG() : base(null) { }
         public IMG(params object[] contents) : base(contents) { }
         public override string TagName { get { return "img"; } }
+        public override bool EndTag { get { return false; } }
         public string alt;
         public string src;
         public cors crossorigin;
@@ -569,6 +577,7 @@ namespace RT.TagSoup.HtmlTags
         public INPUT() : base(null) { }
         public INPUT(params object[] contents) : base(contents) { }
         public override string TagName { get { return "input"; } }
+        public override bool EndTag { get { return false; } }
         public string accept;
         public string alt;
         public autocomplete autocomplete;
@@ -619,6 +628,7 @@ namespace RT.TagSoup.HtmlTags
         public KEYGEN() : base(null) { }
         public KEYGEN(params object[] contents) : base(contents) { }
         public override string TagName { get { return "keygen"; } }
+        public override bool EndTag { get { return false; } }
         public bool autofocus;
         public string challenge;
         public bool disabled;
@@ -653,6 +663,7 @@ namespace RT.TagSoup.HtmlTags
         public LINK() : base(null) { }
         public LINK(params object[] contents) : base(contents) { }
         public override string TagName { get { return "link"; } }
+        public override bool EndTag { get { return false; } }
         public string href;
         public string rel;
         public string media;
@@ -686,6 +697,7 @@ namespace RT.TagSoup.HtmlTags
         public META() : base(null) { }
         public META(params object[] contents) : base(contents) { }
         public override string TagName { get { return "meta"; } }
+        public override bool EndTag { get { return false; } }
         public string name;
         public string httpEquiv;
         public string content;
@@ -776,6 +788,7 @@ namespace RT.TagSoup.HtmlTags
         public PARAM() : base(null) { }
         public PARAM(params object[] contents) : base(contents) { }
         public override string TagName { get { return "param"; } }
+        public override bool EndTag { get { return false; } }
         public string name;
         public string value;
     }
@@ -873,6 +886,7 @@ namespace RT.TagSoup.HtmlTags
         public SOURCE() : base(null) { }
         public SOURCE(params object[] contents) : base(contents) { }
         public override string TagName { get { return "source"; } }
+        public override bool EndTag { get { return false; } }
         public string src;
         public string type;
         public string media;
@@ -1009,6 +1023,7 @@ namespace RT.TagSoup.HtmlTags
         public TRACK() : base(null) { }
         public TRACK(params object[] contents) : base(contents) { }
         public override string TagName { get { return "track"; } }
+        public override bool EndTag { get { return false; } }
         public bool default_;
         public kind kind;
         public string label;
@@ -1055,6 +1070,7 @@ namespace RT.TagSoup.HtmlTags
         public WBR() : base(null) { }
         public WBR(params object[] contents) : base(contents) { }
         public override string TagName { get { return "wbr"; } }
+        public override bool EndTag { get { return false; } }
     }
 
 #pragma warning restore 1591    // Missing XML comment for publicly visible type or member
