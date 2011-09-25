@@ -9,13 +9,26 @@ using RT.Util.ExtensionMethods;
 
 namespace RT.TagSoup
 {
-    /// <summary>
-    /// Abstract base class for an HTML or XHTML tag.
-    /// </summary>
+    /// <summary>Abstract base class for an HTML or XHTML tag.</summary>
+    /// <remarks>
+    ///     <para>The following types are supported in tag contents:</para>
+    ///     <list type="bullet">
+    ///         <item><term><c>string</c></term><description>outputs that string (HTML-escaped, of course)</description></item>
+    ///         <item><term><c>Tag</c></term><description>outputs that tag and its contents</description></item>
+    ///         <item><term><c>IEnumerable&lt;T&gt;</c></term><description>enumerates all contained objects and recursively processes them individually</description></item>
+    ///         <item><term><c>Func&lt;T&gt;</c></term><description>calls the function and recursively processes the return value</description></item>
+    ///     </list>
+    ///     <para>Using lazy-evaluated IEnumerable&lt;T&gt;s and functions of type <c>Func&lt;T&gt;</c> is a convenient way to defer execution to ensure maximally responsive output.</para>
+    /// </remarks>
     public abstract class Tag
     {
         /// <summary>Remembers the contents of this tag.</summary>
         protected List<object> _tagContents = null;
+
+        /// <summary>Constructor.</summary>
+        public Tag() { _tagContents = null; }
+        /// <summary>Constructor.</summary>
+        public Tag(object[] contents) { _tagContents = contents == null ? null : new List<object>(contents); }
 
         /// <summary>Name of the tag.</summary>
         public abstract string TagName { get; }
@@ -29,28 +42,11 @@ namespace RT.TagSoup
         public abstract bool AllowXhtmlEmpty { get; }
 
         /// <summary>Sets the contents of the tag. Any objects are allowed.</summary>
-        /// <param name="contents"></param>
-        /// <returns></returns>
-        /// <remarks>
-        ///     <para>Special support exists for the following types:</para>
-        ///     <list type="bullet">
-        ///         <item><term><c>string</c></term><description>outputs that string (HTML-escaped, of course)</description></item>
-        ///         <item><term><c>IEnumerable&lt;string&gt;</c></term><description>concatenates all contained strings</description></item>
-        ///         <item><term><c>Func&lt;string&gt;</c></term><description>calls the function and outputs the returned string</description></item>
-        ///         <item><term><c>Func&lt;IEnumerable&lt;string&gt;&gt;</c></term><description>calls the function and concatenates all strings returned</description></item>
-        ///         <item><term><c>TagSoup</c></term><description>outputs that tag and its contents</description></item>
-        ///         <item><term><c>IEnumerable&lt;TagSoup&gt;</c></term><description>concatenates all contained tags</description></item>
-        ///         <item><term><c>Func&lt;TagSoup&gt;</c></term><description>calls the function and outputs the returned tag</description></item>
-        ///         <item><term><c>Func&lt;IEnumerable&lt;TagSoup&gt;&gt;</c></term><description>calls the function and concatenates all tags returned</description></item>
-        ///     </list>
-        ///     <para>Using objects of type <c>Func&lt;...&gt;</c> is a convenient way to defer execution to ensure maximally responsive output.</para>
-        /// </remarks>
+        /// <param name="contents">Contents to set to.</param>
+        /// <returns>The same tag.</returns>
         public Tag _(params object[] contents)
         {
-            if (_tagContents == null)
-                _tagContents = new List<object>(contents);
-            else
-                _tagContents.AddRange(contents);
+            _tagContents = contents == null ? null : new List<object>(contents);
             return this;
         }
 
@@ -58,17 +54,18 @@ namespace RT.TagSoup
 
         public Tag Data(string key, object value)
         {
-            if (value == null)
-                return this;
-            if (_data == null)
-                _data = new Dictionary<string, object>();
-            _data[key] = value;
+            if (value != null)
+                (_data ?? (_data = new Dictionary<string, object>()))[key] = value;
             return this;
         }
 
         /// <summary>Adds stuff at the end of the contents of this tag (a string, a tag, a collection of strings or of tags).</summary>
         /// <param name="content">The stuff to add.</param>
-        public void Add(object content) { _tagContents.Add(content); }
+        public void Add(object content)
+        {
+            if (content != null)
+                (_tagContents ?? (_tagContents = new List<object>())).Add(content);
+        }
 
         /// <summary>Outputs this tag and all its contents.</summary>
         /// <returns>A collection of strings which, when concatenated, represent this tag and all its contents.</returns>
@@ -90,8 +87,7 @@ namespace RT.TagSoup
                 if (val is bool && !((bool) val))
                     continue;
                 bool isEnum = field.FieldType.IsEnum;
-                string valStr = val.ToString();
-                if (isEnum && valStr == "_")
+                if (isEnum && (int) val == 0)
                     continue;
 
                 if (!tagPrinted)
@@ -100,15 +96,14 @@ namespace RT.TagSoup
                     tagPrinted = true;
                 }
 
-                if (isEnum)
-                    yield return " " + fixFieldName(field.Name) + "=\"" + fixFieldName(valStr) + "\"";
-                else if (val is bool)
-                {
-                    string s = fixFieldName(field.Name);
-                    yield return " " + s + "=\"" + s + "\"";
-                }
+                if (val is bool)
+                    yield return " " + fixFieldName(field.Name);
+                else if (isEnum && field.FieldType.IsDefined<FlagsAttribute>())
+                    yield return " " + fixFieldName(field.Name) + "=\"" + Enum.GetValues(field.FieldType).Cast<object>().Where(v => ((int) v & (int) val) != 0).Select(v => fixFieldName(v.ToString())).JoinString(" ") + "\"";
+                else if (isEnum)
+                    yield return " " + fixFieldName(field.Name) + "=\"" + fixFieldName(val.ToString()) + "\"";
                 else
-                    yield return " " + fixFieldName(field.Name) + "=\"" + valStr.HtmlEscape() + "\"";
+                    yield return " " + fixFieldName(field.Name) + "=\"" + val.ToString().HtmlEscape() + "\"";
             }
             if (_data != null)
                 foreach (var kvp in _data)
@@ -129,41 +124,44 @@ namespace RT.TagSoup
             if (tagPrinted)
                 yield return ">";
             Exception toThrow = null;
-            foreach (object content in _tagContents)
+            if (_tagContents != null)
             {
-                if (content == null)
-                    continue;
-                if (content is string)
-                    yield return ((string) content).HtmlEscape();
-                else if (content is Func<string>)
+                foreach (object content in _tagContents)
                 {
-                    string result = null;
-                    try { result = ((Func<string>) content)().HtmlEscape(); }
-                    catch (Exception e) { toThrow = e; }
-                    if (toThrow == null && result != null)
-                        yield return result;
-                }
-                else
-                {
-                    IEnumerator<string> en = null;
-                    try
+                    if (content == null)
+                        continue;
+                    if (content is string)
+                        yield return ((string) content).HtmlEscape();
+                    else if (content is Func<string>)
                     {
-                        try { en = ToEnumerable(content).GetEnumerator(); }
+                        string result = null;
+                        try { result = ((Func<string>) content)().HtmlEscape(); }
                         catch (Exception e) { toThrow = e; }
-                        while (toThrow == null)
-                        {
-                            bool hasNext = false;
-                            try { hasNext = en.MoveNext(); }
-                            catch (Exception e) { toThrow = e; }
-                            if (!hasNext)
-                                break;
-                            yield return en.Current;
-                        }
+                        if (toThrow == null && result != null)
+                            yield return result;
                     }
-                    finally
+                    else
                     {
-                        if (en != null)
-                            ((IDisposable) en).Dispose();
+                        IEnumerator<string> en = null;
+                        try
+                        {
+                            try { en = ToEnumerable(content).GetEnumerator(); }
+                            catch (Exception e) { toThrow = e; }
+                            while (toThrow == null)
+                            {
+                                bool hasNext = false;
+                                try { hasNext = en.MoveNext(); }
+                                catch (Exception e) { toThrow = e; }
+                                if (!hasNext)
+                                    break;
+                                yield return en.Current;
+                            }
+                        }
+                        finally
+                        {
+                            if (en != null)
+                                ((IDisposable) en).Dispose();
+                        }
                     }
                 }
             }
@@ -177,7 +175,7 @@ namespace RT.TagSoup
         /// <returns>The entire tag tree as a single string.</returns>
         public override string ToString()
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             foreach (string s in ToEnumerable())
                 sb.Append(s);
             return sb.ToString();
@@ -187,7 +185,7 @@ namespace RT.TagSoup
         /// <returns>The entire tag tree as a single string.</returns>
         public static string ToString(object tagTree)
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             foreach (string s in ToEnumerable(tagTree))
                 sb.Append(s);
             return sb.ToString();
@@ -234,14 +232,14 @@ namespace RT.TagSoup
         /// <returns>Converted field name.</returns>
         private static string fixFieldName(string fn)
         {
-            StringBuilder sb = new StringBuilder(fn.Length);
+            var sb = new StringBuilder(fn.Length);
             for (int i = 0; i < fn.Length; i++)
                 if (fn[i] >= 'A' && fn[i] <= 'Z')
-                    sb.Append(":" + char.ToLowerInvariant(fn[i]));
-                else if (fn[i] == '_' && i < fn.Length - 1)
-                    sb.Append('-');
+                    sb.Append("-" + char.ToLowerInvariant(fn[i]));
                 else if (fn[i] != '_')
                     sb.Append(fn[i]);
+                else if (i < fn.Length - 1)
+                    sb.Append('/');
             return sb.ToString();
         }
 
