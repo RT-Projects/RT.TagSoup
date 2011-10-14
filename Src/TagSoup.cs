@@ -111,14 +111,16 @@ namespace RT.TagSoup
                     tagPrinted = true;
                 }
 
+                yield return " " + fixFieldName(field.Name);
                 if (val is bool)
-                    yield return " " + fixFieldName(field.Name);
-                else if (isEnum && field.FieldType.IsDefined<FlagsAttribute>())
-                    yield return " " + fixFieldName(field.Name) + "=\"" + Enum.GetValues(field.FieldType).Cast<object>().Where(v => ((int) v & (int) val) != 0).Select(v => fixFieldName(v.ToString())).JoinString(" ") + "\"";
-                else if (isEnum)
-                    yield return " " + fixFieldName(field.Name) + "=\"" + fixFieldName(val.ToString()) + "\"";
-                else
-                    yield return " " + fixFieldName(field.Name) + "=\"" + val.ToString().HtmlEscape() + "\"";
+                    continue;
+                yield return "=";
+
+                var stringValue =
+                    isEnum && field.FieldType.IsDefined<FlagsAttribute>() ? Enum.GetValues(field.FieldType).Cast<object>().Where(v => ((int) v & (int) val) != 0).Select(v => fixFieldName(v.ToString())).JoinString(" ") :
+                    isEnum ? fixFieldName(val.ToString()) :
+                    val.ToString().HtmlEscape();
+                yield return stringValue.Length > 0 && stringValue.All(ch => !char.IsWhiteSpace(ch) && ch != '"' && ch != '\'' && ch != '=' && ch != '<' && ch != '>' && ch != '`') ? stringValue : "\"" + stringValue + "\"";
             }
 
             if (_data != null)
