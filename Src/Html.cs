@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using RT.Util.ExtensionMethods;
 
-namespace RT.TagSoup.HtmlTags
+namespace RT.TagSoup
 {
     /// <summary>Abstract base class for HTML tags.</summary>
     /// <remarks>Useful reference: http://simon.html5.org/html-elements</remarks>
@@ -12,22 +12,6 @@ namespace RT.TagSoup.HtmlTags
         public HtmlTag() : base() { }
         /// <summary>Constructor.</summary>
         public HtmlTag(params object[] contents) : base(contents) { }
-        /// <summary>Returns false.</summary>
-        public override bool AllowXhtmlEmpty { get { return false; } }
-        /// <summary>Creates a simple HTML document from the specified elements.</summary>
-        /// <param name="title">Title to use in the &lt;TITLE&gt; tag in the head.</param>
-        /// <param name="bodyContent">Contents of the &lt;BODY&gt; tag.</param>
-        /// <returns>An <see cref="HtmlTag"/> representing the entire HTML document.</returns>
-        public static HtmlTag HtmlDocument(object title, params object[] bodyContent) { return new HTML(new HEAD(new TITLE(title), new META { httpEquiv = "Content-type", content = "text/html; charset=utf-8" }), new BODY(bodyContent)); }
-
-        /// <summary>Special method to help construct an HTML <c>&lt;TABLE&gt;</c> element
-        /// without needing to manually instantiate all intermediate row and cell tags.</summary>
-        /// <param name="classOnAllTags">If set to a value other than null, causes all rows and cells within the generated table to have the specified CSS class.</param>
-        /// <param name="rows">Rows (arrays of cell contents).</param>
-        public static HtmlTag HtmlTable(string classOnAllTags, params object[][] rows)
-        {
-            return new TABLE(rows.Select(row => new TR(row.Select(cell => new TD(cell) { class_ = classOnAllTags })) { class_ = classOnAllTags })) { class_ = classOnAllTags };
-        }
 
         // Attributes common to all HTML tags
         public string accesskey;
@@ -537,8 +521,13 @@ namespace RT.TagSoup.HtmlTags
         public override string TagName { get { return "html"; } }
         public override bool StartTag { get { return false; } }
         public override bool EndTag { get { return false; } }
-        public override string DocType { get { return "<!DOCTYPE html>"; } }
         public string manifest;
+        public override IEnumerable<string> ToEnumerable()
+        {
+            yield return "<!DOCTYPE html>";
+            foreach (var item in base.ToEnumerable())
+                yield return item;
+        }
     }
     public sealed class I : HtmlTag
     {

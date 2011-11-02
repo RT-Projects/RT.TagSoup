@@ -9,7 +9,7 @@ using RT.Util.ExtensionMethods;
 
 namespace RT.TagSoup
 {
-    /// <summary>Abstract base class for an HTML or XHTML tag.</summary>
+    /// <summary>Abstract base class for an HTML tag.</summary>
     /// <remarks>
     ///     <para>The following types are supported in tag contents:</para>
     ///     <list type="bullet">
@@ -34,14 +34,25 @@ namespace RT.TagSoup
 
         /// <summary>Name of the tag.</summary>
         public abstract string TagName { get; }
-        /// <summary>DOCTYPE that is output before the tag. Only used by the &lt;HTML&gt; HTML tag and the &lt;html&gt; XHTML tag.</summary>
-        public virtual string DocType { get { return null; } }
         /// <summary>Whether the start tag should be printed. If the tag has attributes, it will be printed regardless.</summary>
         public virtual bool StartTag { get { return true; } }
         /// <summary>Whether the end tag should be printed.</summary>
         public virtual bool EndTag { get { return true; } }
-        /// <summary>Whether XHTML-style &lt;/&gt; empty-tag markers are allowed.</summary>
-        public abstract bool AllowXhtmlEmpty { get; }
+
+        /// <summary>Creates a simple HTML document from the specified elements.</summary>
+        /// <param name="title">Title to use in the &lt;TITLE&gt; tag in the head.</param>
+        /// <param name="bodyContent">Contents of the &lt;BODY&gt; tag.</param>
+        /// <returns>An <see cref="HtmlTag"/> representing the entire HTML document.</returns>
+        public static Tag HtmlDocument(object title, params object[] bodyContent) { return new HTML(new HEAD(new TITLE(title), new META { httpEquiv = "Content-type", content = "text/html; charset=utf-8" }), new BODY(bodyContent)); }
+
+        /// <summary>Special method to help construct an HTML <c>&lt;TABLE&gt;</c> element
+        /// without needing to manually instantiate all intermediate row and cell tags.</summary>
+        /// <param name="classOnAllTags">If set to a value other than null, causes all rows and cells within the generated table to have the specified CSS class.</param>
+        /// <param name="rows">Rows (arrays of cell contents).</param>
+        public static Tag HtmlTable(string classOnAllTags, params object[][] rows)
+        {
+            return new TABLE(rows.Select(row => new TR(row.Select(cell => new TD(cell) { class_ = classOnAllTags })) { class_ = classOnAllTags })) { class_ = classOnAllTags };
+        }
 
         /// <summary>Sets the contents of the tag. Any objects are allowed.</summary>
         /// <param name="contents">Contents to set to.</param>
@@ -86,9 +97,6 @@ namespace RT.TagSoup
         /// <returns>A collection of strings which, when concatenated, represent this tag and all its contents.</returns>
         public virtual IEnumerable<string> ToEnumerable()
         {
-            if (DocType != null)
-                yield return DocType;
-
             if (StartTag)
                 yield return "<" + TagName;
             bool tagPrinted = StartTag;
@@ -163,7 +171,7 @@ namespace RT.TagSoup
                 yield return enumerator.Current;
             }
 
-            if (tagIncomplete && AllowXhtmlEmpty && EndTag)
+            if (tagIncomplete && EndTag)
             {
                 yield return "/>";
                 yield break;
