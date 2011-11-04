@@ -171,12 +171,7 @@ namespace RT.TagSoup
                 yield return enumerator.Current;
             }
 
-            if (tagIncomplete && EndTag)
-            {
-                yield return "/>";
-                yield break;
-            }
-            else if (tagIncomplete)
+            if (tagIncomplete)
                 yield return ">";
 
             if (EndTag)
