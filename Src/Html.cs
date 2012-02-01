@@ -841,7 +841,7 @@ namespace RT.TagSoup
         public SCRIPT(params object[] contents) : base(contents) { }
         public override string TagName { get { return "script"; } }
         public string src;
-        public bool async;
+        public bool @async;
         public bool defer;
         public string type;
         public string charset;
