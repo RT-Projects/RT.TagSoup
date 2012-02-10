@@ -271,4 +271,20 @@ namespace RT.TagSoup
         /// <summary>Constructor.</summary>
         public TagSoupDeferredException(Exception inner) : base(null, inner) { }
     }
+
+    /// <summary>
+    /// Outputs whatever content is passed to it without any escaping. Do not use unless there's absolutely no other way of doing something.
+    /// </summary>
+    public sealed class RawTag : Tag
+    {
+        private string _value;
+        /// <summary>Constructor.</summary>
+        public RawTag(string value_) { _value = value_; }
+        /// <summary>Throws the not implemented exception.</summary>
+        public override string TagName { get { throw new NotImplementedException(); } }
+        /// <summary>Enumerates the content.</summary>
+        public override IEnumerable<string> ToEnumerable() { yield return _value; }
+        /// <summary>Returns the content.</summary>
+        public override string ToString() { return _value; }
+    }
 }
