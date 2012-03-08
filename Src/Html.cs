@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using RT.Util.ExtensionMethods;
+using System.Text.RegularExpressions;
 
 namespace RT.TagSoup
 {
@@ -115,12 +115,18 @@ namespace RT.TagSoup
 
     public sealed class STYLELiteral : HtmlTag
     {
-        public STYLELiteral(string literal) : base() { Literal = literal; }
+        public STYLELiteral(string literal)
+            : base()
+        {
+            if (Regex.IsMatch(literal, @"<!--|-->|</?style\s*>"))
+                throw new ArgumentException("Style literal may not contain <!--, -->, <style> or </style>.", "literal");
+            Literal = literal;
+        }
         public override string TagName { get { return "style"; } }
         public string Literal;
         public override IEnumerable<string> ToEnumerable()
         {
-            yield return @"<style type=""text/css"">";
+            yield return @"<style type=text/css>";
             yield return Literal;
             yield return @"</style>";
         }
@@ -128,12 +134,18 @@ namespace RT.TagSoup
 
     public sealed class SCRIPTLiteral : HtmlTag
     {
-        public SCRIPTLiteral(string literal) : base() { Literal = literal; }
+        public SCRIPTLiteral(string literal)
+            : base()
+        {
+            if (Regex.IsMatch(literal,@"<!--|-->|</?script\s*>"))
+                throw new ArgumentException("Script literal may not contain <!--, -->, <script> or </script>.", "literal");
+            Literal = literal;
+        }
         public override string TagName { get { return "script"; } }
         public string Literal;
         public override IEnumerable<string> ToEnumerable()
         {
-            yield return @"<script type=""text/javascript"">";
+            yield return @"<script type=text/javascript>";
             yield return Literal;
             yield return @"</script>";
         }
