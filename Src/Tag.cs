@@ -146,29 +146,14 @@ namespace RT.TagSoup
             }
 
             var tagIncomplete = tagPrinted;
-            Exception toThrow = null;
-            IEnumerator<string> enumerator = null;
-            try { enumerator = Tag.ToEnumerable(_tagContents).GetEnumerator(); }
-            catch (Exception e) { toThrow = e; }
-            while (toThrow == null)
+            foreach (var element in Tag.ToEnumerable(_tagContents))
             {
-                try
-                {
-                    if (!enumerator.MoveNext())
-                        break;
-                }
-                catch (Exception e)
-                {
-                    toThrow = e;
-                    break;
-                }
-
                 if (tagIncomplete)
                 {
                     yield return ">";
                     tagIncomplete = false;
                 }
-                yield return enumerator.Current;
+                yield return element;
             }
 
             if (tagIncomplete)
@@ -176,9 +161,6 @@ namespace RT.TagSoup
 
             if (EndTag)
                 yield return "</" + TagName + ">";
-
-            if (toThrow != null)
-                throw new TagSoupDeferredException(toThrow);
         }
 
         /// <summary>Converts the entire tag tree into a single string.</summary>
@@ -261,15 +243,6 @@ namespace RT.TagSoup
                     t.Write(str);
             }
         }
-    }
-
-    /// <summary>
-    /// Used by <see cref="TagSoup"/> to defer exceptions until after the output of the entire tag tree is complete.
-    /// </summary>
-    public sealed class TagSoupDeferredException : Exception
-    {
-        /// <summary>Constructor.</summary>
-        public TagSoupDeferredException(Exception inner) : base(null, inner) { }
     }
 
     /// <summary>
