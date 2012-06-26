@@ -183,6 +183,18 @@ namespace RT.TagSoup
             return sb.ToString();
         }
 
+        /// <summary>Converts a tag tree into a raw tag which would render exactly the same as the tag tree.</summary>
+        public static RawTag ToRaw(object tagTree)
+        {
+            return new RawTag(ToString(tagTree));
+        }
+
+        /// <summary>Converts a tag tree into a raw tag which would render exactly the same as the tag tree.</summary>
+        public static RawTag ToRaw(params object[] tagTree)
+        {
+            return new RawTag(ToString(tagTree));
+        }
+
         /// <summary>Converts a tag tree into a string that is generated bit by bit.</summary>
         /// <returns>A collection that generates the entire tag tree as a string.</returns>
         public static IEnumerable<string> ToEnumerable(object tagTree)
