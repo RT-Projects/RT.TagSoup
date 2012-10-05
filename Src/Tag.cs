@@ -87,7 +87,7 @@ namespace RT.TagSoup
         {
             if (_tagContents == null)
                 _tagContents = new List<object>();
-            if (!(_tagContents is List<object>))
+            else if (!(_tagContents is List<object>))
                 _tagContents = _tagContents.Cast<object>().ToList();
 
             ((List<object>) _tagContents).Add(content);
@@ -224,22 +224,22 @@ namespace RT.TagSoup
         /// <example>
         ///     <list type="bullet">
         ///         <item><c>class_</c> is converted to <c>"class"</c></item>
-        ///         <item><c>accept_charset</c> is converted to <c>"accept-charset"</c></item>
-        ///         <item><c>xmlLang</c> is converted to <c>"xml:lang"</c></item>
+        ///         <item><c>acceptCharset</c> is converted to <c>"accept-charset"</c></item>
+        ///         <item><c>text_plain</c> is converted to <c>"text/plain"</c></item>
         ///         <item><c>_</c> would be converted to the empty string, but <see cref="ToEnumerable"/> already skips those.</item>
         ///     </list>
         /// </example>
-        /// <param name="fn">Field name to convert.</param>
+        /// <param name="fieldName">Field name to convert.</param>
         /// <returns>Converted field name.</returns>
-        private static string fixFieldName(string fn)
+        private static string fixFieldName(string fieldName)
         {
-            var sb = new StringBuilder(fn.Length);
-            for (int i = 0; i < fn.Length; i++)
-                if (fn[i] >= 'A' && fn[i] <= 'Z')
-                    sb.Append("-" + char.ToLowerInvariant(fn[i]));
-                else if (fn[i] != '_')
-                    sb.Append(fn[i]);
-                else if (i < fn.Length - 1)
+            var sb = new StringBuilder(fieldName.Length);
+            for (int i = 0; i < fieldName.Length; i++)
+                if (fieldName[i] >= 'A' && fieldName[i] <= 'Z')
+                    sb.Append("-" + char.ToLowerInvariant(fieldName[i]));
+                else if (fieldName[i] != '_')
+                    sb.Append(fieldName[i]);
+                else if (i < fieldName.Length - 1)
                     sb.Append('/');
             return sb.ToString();
         }
