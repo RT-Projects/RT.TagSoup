@@ -206,7 +206,7 @@ namespace RT.TagSoup
                 return new[] { ((string) tagTree).HtmlEscape() };
 
             if (tagTree is IEnumerable<string>)
-                return ((IEnumerable<string>) tagTree).Select(StringExtensions.HtmlEscape);
+                return ((IEnumerable<string>) tagTree).Select(s => s.HtmlEscape());
 
             if (tagTree is Tag)
                 return ((Tag) tagTree).ToEnumerable();
