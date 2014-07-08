@@ -63,6 +63,15 @@ namespace RT.TagSoup
             return this;
         }
 
+        /// <summary>Sets the contents of the tag using lazy evaluation.</summary>
+        /// <param name="contents">Contents to set to.</param>
+        /// <returns>The same tag.</returns>
+        public Tag _(params Func<object>[] contents)
+        {
+            _tagContents = contents;
+            return this;
+        }
+
         /// <summary>Sets the contents of the tag. Any objects are allowed.</summary>
         /// <param name="contents">Contents to set to.</param>
         /// <returns>The same tag.</returns>
@@ -124,11 +133,10 @@ namespace RT.TagSoup
                     continue;
                 yield return "=";
 
-                var stringValue =
+                yield return attributeValue(
                     isEnum && field.FieldType.IsDefined<FlagsAttribute>() ? Enum.GetValues(field.FieldType).Cast<object>().Where(v => ((int) v & (int) val) != 0).Select(v => fixFieldName(v.ToString())).JoinString(" ") :
                     isEnum ? fixFieldName(val.ToString()) :
-                    val.ToString().HtmlEscape();
-                yield return stringValue.Length > 0 && stringValue.All(ch => !char.IsWhiteSpace(ch) && ch != '"' && ch != '\'' && ch != '=' && ch != '<' && ch != '>' && ch != '`') ? stringValue : "\"" + stringValue + "\"";
+                    val.ToString());
             }
 
             if (_data != null)
@@ -141,7 +149,7 @@ namespace RT.TagSoup
                         if (ch != '-' && ch != '_' && (ch < '0' || ch > '9') && (ch < 'A' || ch > 'Z') && (ch < 'a' || ch > 'z'))
                             throw new InvalidOperationException("data attribute name cannot contain character “{0}”.".Fmt(ch));
                     }
-                    yield return " data-" + kvp.Key + "=\"" + kvp.Value.ToString().HtmlEscape() + "\"";
+                    yield return " data-" + kvp.Key + "=" + attributeValue(kvp.Value.ToString());
                 }
             }
 
@@ -161,6 +169,17 @@ namespace RT.TagSoup
 
             if (EndTag)
                 yield return "</" + TagName + ">";
+        }
+
+        private string attributeValue(string p)
+        {
+            if (p.Length == 0)
+                return "''";
+            if (p.All(ch => !char.IsWhiteSpace(ch) && ch != '"' && ch != '\'' && ch != '=' && ch != '<' && ch != '>' && ch != '`'))
+                return p;
+            if (p.All(ch => ch != '\''))
+                return "'" + p.HtmlEscape(leaveDoubleQuotesAlone: true) + "'";
+            return "\"" + p.HtmlEscape(leaveSingleQuotesAlone: true) + "\"";
         }
 
         /// <summary>Converts the entire tag tree into a single string.</summary>
@@ -214,7 +233,7 @@ namespace RT.TagSoup
             if (tagTree is IEnumerable)
                 return ((IEnumerable) tagTree).Cast<object>().SelectMany(ToEnumerable);
 
-            if (tagTree is Delegate && ((Delegate) tagTree).Method.GetParameters().Length == 0)
+            if (tagTree is Func<object> || (tagTree is Delegate && ((Delegate) tagTree).Method.GetParameters().Length == 0))
                 return ToEnumerable(((Delegate) tagTree).DynamicInvoke(null));
 
             return new[] { tagTree.ToString().HtmlEscape() };
