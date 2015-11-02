@@ -9,17 +9,31 @@ using RT.Util.ExtensionMethods;
 
 namespace RT.TagSoup
 {
-    /// <summary>Abstract base class for an HTML tag.</summary>
+    /// <summary>
+    ///     Abstract base class for an HTML tag.</summary>
     /// <remarks>
-    ///     <para>The following types are supported in tag contents:</para>
+    ///     <para>
+    ///         The following types are supported in tag contents:</para>
     ///     <list type="bullet">
-    ///         <item><term><c>string</c></term><description>outputs that string (HTML-escaped, of course)</description></item>
-    ///         <item><term><c>Tag</c></term><description>outputs that tag and its contents</description></item>
-    ///         <item><term><c>IEnumerable&lt;T&gt;</c></term><description>enumerates all contained objects and recursively processes them individually</description></item>
-    ///         <item><term><c>Func&lt;T&gt;</c> (or any other delegate with no parameters)</term><description>calls the delegate and recursively processes the return value</description></item>
-    ///     </list>
-    ///     <para>Using lazy-evaluated IEnumerable&lt;T&gt;s and/or delegates is a convenient way to defer execution to ensure maximally responsive output.</para>
-    /// </remarks>
+    ///         <item><term>
+    ///             <c>string</c></term>
+    ///         <description>
+    ///             outputs that string (HTML-escaped, of course)</description></item>
+    ///         <item><term>
+    ///             <c>Tag</c></term>
+    ///         <description>
+    ///             outputs that tag and its contents</description></item>
+    ///         <item><term>
+    ///             <c>IEnumerable&lt;T&gt;</c></term>
+    ///         <description>
+    ///             enumerates all contained objects and recursively processes them individually</description></item>
+    ///         <item><term>
+    ///             <c>Func&lt;T&gt;</c> (or any other delegate with no parameters)</term>
+    ///         <description>
+    ///             calls the delegate and recursively processes the return value</description></item></list>
+    ///     <para>
+    ///         Using lazy-evaluated IEnumerable&lt;T&gt;s and/or delegates is a convenient way to defer execution to ensure
+    ///         maximally responsive output.</para></remarks>
     public abstract class Tag
     {
         /// <summary>Remembers the contents of this tag.</summary>
@@ -39,42 +53,59 @@ namespace RT.TagSoup
         /// <summary>Whether the end tag should be printed.</summary>
         public virtual bool EndTag { get { return true; } }
 
-        /// <summary>Creates a simple HTML document from the specified elements.</summary>
-        /// <param name="title">Title to use in the &lt;TITLE&gt; tag in the head.</param>
-        /// <param name="bodyContent">Contents of the &lt;BODY&gt; tag.</param>
-        /// <returns>An <see cref="HtmlTag"/> representing the entire HTML document.</returns>
+        /// <summary>
+        ///     Creates a simple HTML document from the specified elements.</summary>
+        /// <param name="title">
+        ///     Title to use in the &lt;TITLE&gt; tag in the head.</param>
+        /// <param name="bodyContent">
+        ///     Contents of the &lt;BODY&gt; tag.</param>
+        /// <returns>
+        ///     An <see cref="HtmlTag"/> representing the entire HTML document.</returns>
         public static Tag HtmlDocument(object title, params object[] bodyContent) { return new HTML(new HEAD(new TITLE(title), new META { httpEquiv = "Content-type", content = "text/html; charset=utf-8" }), new BODY(bodyContent)); }
 
-        /// <summary>Special method to help construct an HTML <c>&lt;TABLE&gt;</c> element
-        /// without needing to manually instantiate all intermediate row and cell tags.</summary>
-        /// <param name="classOnAllTags">If set to a value other than null, causes all rows and cells within the generated table to have the specified CSS class.</param>
-        /// <param name="rows">Rows (arrays of cell contents).</param>
+        /// <summary>
+        ///     Special method to help construct an HTML <c>&lt;TABLE&gt;</c> element without needing to manually instantiate
+        ///     all intermediate row and cell tags.</summary>
+        /// <param name="classOnAllTags">
+        ///     If set to a value other than null, causes all rows and cells within the generated table to have the specified
+        ///     CSS class.</param>
+        /// <param name="rows">
+        ///     Rows (arrays of cell contents).</param>
         public static Tag HtmlTable(string classOnAllTags, params object[][] rows)
         {
             return new TABLE(rows.Select(row => new TR(row.Select(cell => new TD(cell) { class_ = classOnAllTags })) { class_ = classOnAllTags })) { class_ = classOnAllTags };
         }
 
-        /// <summary>Sets the contents of the tag. Any objects are allowed.</summary>
-        /// <param name="contents">Contents to set to.</param>
-        /// <returns>The same tag.</returns>
+        /// <summary>
+        ///     Sets the contents of the tag. Any objects are allowed.</summary>
+        /// <param name="contents">
+        ///     Contents to set to.</param>
+        /// <returns>
+        ///     The same tag.</returns>
         public Tag _(params object[] contents)
         {
             _tagContents = contents;
             return this;
         }
 
-        /// <summary>Sets the contents of the tag using lazy evaluation.</summary>
-        /// <param name="contents">Contents to set to.</param>
-        /// <returns>The same tag.</returns>
+        /// <summary>
+        ///     Sets the contents of the tag using lazy evaluation.</summary>
+        /// <param name="contents">
+        ///     Contents to set to.</param>
+        /// <returns>
+        ///     The same tag.</returns>
         public Tag _(params Func<object>[] contents)
         {
             _tagContents = contents;
             return this;
         }
 
-        /// <summary>Sets the contents of the tag. Any objects are allowed.</summary>
-        /// <param name="contents">Contents to set to.</param>
-        /// <returns>The same tag.</returns>
+        /// <summary>
+        ///     Sets the contents of the tag. Any objects are allowed.</summary>
+        /// <param name="contents">
+        ///     Contents to set to.</param>
+        /// <returns>
+        ///     The same tag.</returns>
         public Tag _(IEnumerable contents)
         {
             _tagContents = contents;
@@ -83,6 +114,14 @@ namespace RT.TagSoup
 
         private Dictionary<string, object> _data;
 
+        /// <summary>
+        ///     Specifies a <c>data</c> attribute for this tag.</summary>
+        /// <param name="key">
+        ///     The key. For example, if you pass in <c>name</c> here, the attribute will be <c>data-name="..."</c>.</param>
+        /// <param name="value">
+        ///     The value for the data attribute.</param>
+        /// <returns>
+        ///     The same tag.</returns>
         public Tag Data(string key, object value)
         {
             if (value != null)
@@ -90,8 +129,10 @@ namespace RT.TagSoup
             return this;
         }
 
-        /// <summary>Adds stuff at the end of the contents of this tag (a string, a tag, a collection of strings or of tags).</summary>
-        /// <param name="content">The stuff to add.</param>
+        /// <summary>
+        ///     Adds stuff at the end of the contents of this tag (a string, a tag, a collection of strings or of tags).</summary>
+        /// <param name="content">
+        ///     The stuff to add.</param>
         public void Add(object content)
         {
             if (_tagContents == null)
@@ -102,8 +143,10 @@ namespace RT.TagSoup
             ((List<object>) _tagContents).Add(content);
         }
 
-        /// <summary>Outputs this tag and all its contents.</summary>
-        /// <returns>A collection of strings which, when concatenated, represent this tag and all its contents.</returns>
+        /// <summary>
+        ///     Outputs this tag and all its contents.</summary>
+        /// <returns>
+        ///     A collection of strings which, when concatenated, represent this tag and all its contents.</returns>
         public virtual IEnumerable<string> ToEnumerable()
         {
             if (StartTag)
@@ -182,8 +225,10 @@ namespace RT.TagSoup
             return "\"" + p.HtmlEscape(leaveSingleQuotesAlone: true) + "\"";
         }
 
-        /// <summary>Converts the entire tag tree into a single string.</summary>
-        /// <returns>The entire tag tree as a single string.</returns>
+        /// <summary>
+        ///     Converts the entire tag tree into a single string.</summary>
+        /// <returns>
+        ///     The entire tag tree as a single string.</returns>
         public override string ToString()
         {
             var sb = new StringBuilder();
@@ -192,8 +237,10 @@ namespace RT.TagSoup
             return sb.ToString();
         }
 
-        /// <summary>Converts a tag tree into a single string.</summary>
-        /// <returns>The entire tag tree as a single string.</returns>
+        /// <summary>
+        ///     Converts a tag tree into a single string.</summary>
+        /// <returns>
+        ///     The entire tag tree as a single string.</returns>
         public static string ToString(object tagTree)
         {
             var sb = new StringBuilder();
@@ -214,8 +261,10 @@ namespace RT.TagSoup
             return new RawTag(ToString(tagTree));
         }
 
-        /// <summary>Converts a tag tree into a string that is generated bit by bit.</summary>
-        /// <returns>A collection that generates the entire tag tree as a string.</returns>
+        /// <summary>
+        ///     Converts a tag tree into a string that is generated bit by bit.</summary>
+        /// <returns>
+        ///     A collection that generates the entire tag tree as a string.</returns>
         public static IEnumerable<string> ToEnumerable(object tagTree)
         {
             if (tagTree == null)
@@ -239,17 +288,19 @@ namespace RT.TagSoup
             return new[] { tagTree.ToString().HtmlEscape() };
         }
 
-        /// <summary>Converts a C#-compatible field name into an HTML/XHTML-compatible one.</summary>
+        /// <summary>
+        ///     Converts a C#-compatible field name into an HTML/XHTML-compatible one.</summary>
         /// <example>
         ///     <list type="bullet">
         ///         <item><c>class_</c> is converted to <c>"class"</c></item>
         ///         <item><c>acceptCharset</c> is converted to <c>"accept-charset"</c></item>
         ///         <item><c>text_plain</c> is converted to <c>"text/plain"</c></item>
-        ///         <item><c>_</c> would be converted to the empty string, but <see cref="ToEnumerable"/> already skips those.</item>
-        ///     </list>
-        /// </example>
-        /// <param name="fieldName">Field name to convert.</param>
-        /// <returns>Converted field name.</returns>
+        ///         <item><c>_</c> would be converted to the empty string, but <see cref="ToEnumerable()"/> already skips
+        ///         those.</item></list></example>
+        /// <param name="fieldName">
+        ///     Field name to convert.</param>
+        /// <returns>
+        ///     Converted field name.</returns>
         private static string fixFieldName(string fieldName)
         {
             var sb = new StringBuilder(fieldName.Length);
@@ -263,8 +314,10 @@ namespace RT.TagSoup
             return sb.ToString();
         }
 
-        /// <summary>Creates a new file and outputs this tag and all its contents to it.</summary>
-        /// <param name="filename">The path and filename of the file to create. If the file already exists, it will be overwritten.</param>
+        /// <summary>
+        ///     Creates a new file and outputs this tag and all its contents to it.</summary>
+        /// <param name="filename">
+        ///     The path and filename of the file to create. If the file already exists, it will be overwritten.</param>
         public void WriteToFile(string filename)
         {
             using (var f = File.Open(filename, FileMode.Create, FileAccess.Write, FileShare.Write))
@@ -277,8 +330,8 @@ namespace RT.TagSoup
     }
 
     /// <summary>
-    /// Outputs whatever content is passed to it without any escaping. Do not use unless there's absolutely no other way of doing something.
-    /// </summary>
+    ///     Outputs whatever content is passed to it without any escaping. Do not use unless there's absolutely no other way
+    ///     of doing something.</summary>
     public sealed class RawTag : Tag
     {
         private string _value;

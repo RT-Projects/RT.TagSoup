@@ -4,14 +4,18 @@ using System.Text.RegularExpressions;
 
 namespace RT.TagSoup
 {
-    /// <summary>Abstract base class for HTML tags.</summary>
-    /// <remarks>Useful reference: http://simon.html5.org/html-elements</remarks>
+    /// <summary>
+    ///     Abstract base class for HTML tags.</summary>
+    /// <remarks>
+    ///     Useful reference: http://simon.html5.org/html-elements</remarks>
     public abstract class HtmlTag : Tag
     {
         /// <summary>Constructor.</summary>
         public HtmlTag() : base() { }
         /// <summary>Constructor.</summary>
         public HtmlTag(params object[] contents) : base(contents) { }
+
+#pragma warning disable 1591    // Missing XML comment for publicly visible type or member
 
         // Attributes common to all HTML tags
         public string accesskey;
@@ -89,6 +93,67 @@ namespace RT.TagSoup
         public string ontimeupdate;
         public string onvolumechange;
         public string onwaiting;
+#pragma warning restore 1591    // Missing XML comment for publicly visible type or member
+    }
+
+    /// <summary>Represents an HTML <c>&lt;style&gt;</c> tag whose contents are provided literally (not via an <c>href</c>).</summary>
+    public sealed class STYLELiteral : HtmlTag
+    {
+        /// <summary>
+        ///     Creates an HTML <c>&lt;style&gt;</c> tag.</summary>
+        /// <param name="literal">
+        ///     Specifies the literal contents of the tag.</param>
+        public STYLELiteral(string literal)
+            : base()
+        {
+            if (Regex.IsMatch(literal, @"<!--|-->|</?style\s*>"))
+                throw new ArgumentException("Style literal may not contain <!--, -->, <style> or </style>.", "literal");
+            Literal = literal;
+        }
+        /// <summary>Returns <c>"style"</c>.</summary>
+        public override string TagName { get { return "style"; } }
+        /// <summary>Specifies the literal tag contents.</summary>
+        public string Literal;
+        /// <summary>
+        ///     Outputs this tag and all its contents.</summary>
+        /// <returns>
+        ///     A collection of strings which, when concatenated, represent this tag and all its contents.</returns>
+        public override IEnumerable<string> ToEnumerable()
+        {
+            yield return @"<style type=text/css>";
+            yield return Literal;
+            yield return @"</style>";
+        }
+    }
+
+    /// <summary>Represents an HTML <c>&lt;script&gt;</c> tag whose contents are provided literally (not via an <c>href</c>).</summary>
+    public sealed class SCRIPTLiteral : HtmlTag
+    {
+        /// <summary>
+        ///     Creates an HTML <c>&lt;style&gt;</c> tag.</summary>
+        /// <param name="literal">
+        ///     Specifies the literal contents of the tag.</param>
+        public SCRIPTLiteral(string literal)
+            : base()
+        {
+            if (Regex.IsMatch(literal, @"<!--|-->|</?script\s*>"))
+                throw new ArgumentException("Script literal may not contain <!--, -->, <script> or </script>.", "literal");
+            Literal = literal;
+        }
+        /// <summary>Returns <c>"script"</c>.</summary>
+        public override string TagName { get { return "script"; } }
+        /// <summary>Specifies the literal tag contents.</summary>
+        public string Literal;
+        /// <summary>
+        ///     Outputs this tag and all its contents.</summary>
+        /// <returns>
+        ///     A collection of strings which, when concatenated, represent this tag and all its contents.</returns>
+        public override IEnumerable<string> ToEnumerable()
+        {
+            yield return @"<script type=text/javascript>";
+            yield return Literal;
+            yield return @"</script>";
+        }
     }
 
 #pragma warning disable 1591    // Missing XML comment for publicly visible type or member
@@ -112,44 +177,6 @@ namespace RT.TagSoup
     public enum dir { _, ltr, rtl, auto }
     public enum dropzone { _, copy, move, link }
     public enum method { _, get, post }
-
-    public sealed class STYLELiteral : HtmlTag
-    {
-        public STYLELiteral(string literal)
-            : base()
-        {
-            if (Regex.IsMatch(literal, @"<!--|-->|</?style\s*>"))
-                throw new ArgumentException("Style literal may not contain <!--, -->, <style> or </style>.", "literal");
-            Literal = literal;
-        }
-        public override string TagName { get { return "style"; } }
-        public string Literal;
-        public override IEnumerable<string> ToEnumerable()
-        {
-            yield return @"<style type=text/css>";
-            yield return Literal;
-            yield return @"</style>";
-        }
-    }
-
-    public sealed class SCRIPTLiteral : HtmlTag
-    {
-        public SCRIPTLiteral(string literal)
-            : base()
-        {
-            if (Regex.IsMatch(literal,@"<!--|-->|</?script\s*>"))
-                throw new ArgumentException("Script literal may not contain <!--, -->, <script> or </script>.", "literal");
-            Literal = literal;
-        }
-        public override string TagName { get { return "script"; } }
-        public string Literal;
-        public override IEnumerable<string> ToEnumerable()
-        {
-            yield return @"<script type=text/javascript>";
-            yield return Literal;
-            yield return @"</script>";
-        }
-    }
 
     public sealed class A : HtmlTag
     {
