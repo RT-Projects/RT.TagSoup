@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using RT.Util;
-using RT.Util.ExtensionMethods;
 
 namespace RT.TagSoup
 {
@@ -177,7 +175,7 @@ namespace RT.TagSoup
                 yield return "=";
 
                 yield return attributeValue(
-                    isEnum && field.FieldType.IsDefined<FlagsAttribute>() ? Enum.GetValues(field.FieldType).Cast<object>().Where(v => ((int) v & (int) val) != 0).Select(v => fixFieldName(v.ToString())).JoinString(" ") :
+                    isEnum && field.FieldType.IsDefined<FlagsAttribute>() ? string.Join(" ", Enum.GetValues(field.FieldType).Cast<object>().Where(v => ((int) v & (int) val) != 0).Select(v => fixFieldName(v.ToString()))) :
                     isEnum ? fixFieldName(val.ToString()) :
                     val.ToString());
             }
@@ -190,7 +188,7 @@ namespace RT.TagSoup
                     {
                         var ch = kvp.Key[i];
                         if (ch != '-' && ch != '_' && (ch < '0' || ch > '9') && (ch < 'A' || ch > 'Z') && (ch < 'a' || ch > 'z'))
-                            throw new InvalidOperationException("data attribute name cannot contain character “{0}”.".Fmt(ch));
+                            throw new InvalidOperationException(string.Format("data attribute name cannot contain character “{0}”.", ch));
                     }
                     yield return " data-" + kvp.Key + "=" + attributeValue(kvp.Value.ToString());
                 }
