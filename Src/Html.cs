@@ -116,9 +116,12 @@ namespace RT.TagSoup
         public string Literal;
         /// <summary>
         ///     Outputs this tag and all its contents.</summary>
+        /// <param name="allTags">
+        ///     The HTML specification allows certain start and end tags to be omitted. Specify <c>true</c> to emit such tags
+        ///     regardless, for compatibility reasons.</param>
         /// <returns>
         ///     A collection of strings which, when concatenated, represent this tag and all its contents.</returns>
-        public override IEnumerable<string> ToEnumerable()
+        public override IEnumerable<string> ToEnumerable(bool allTags = false)
         {
             yield return @"<style type=text/css>";
             yield return Literal;
@@ -146,9 +149,12 @@ namespace RT.TagSoup
         public string Literal;
         /// <summary>
         ///     Outputs this tag and all its contents.</summary>
+        /// <param name="allTags">
+        ///     The HTML specification allows certain start and end tags to be omitted. Specify <c>true</c> to emit such tags
+        ///     regardless, for compatibility reasons.</param>
         /// <returns>
         ///     A collection of strings which, when concatenated, represent this tag and all its contents.</returns>
-        public override IEnumerable<string> ToEnumerable()
+        public override IEnumerable<string> ToEnumerable(bool allTags = false)
         {
             yield return @"<script type=text/javascript>";
             yield return Literal;
@@ -561,10 +567,10 @@ namespace RT.TagSoup
         public override bool StartTag { get { return false; } }
         public override bool EndTag { get { return false; } }
         public string manifest;
-        public override IEnumerable<string> ToEnumerable()
+        public override IEnumerable<string> ToEnumerable(bool allTags = false)
         {
             yield return "<!DOCTYPE html>";
-            foreach (var item in base.ToEnumerable())
+            foreach (var item in base.ToEnumerable(allTags))
                 yield return item;
         }
     }

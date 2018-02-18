@@ -143,13 +143,16 @@ namespace RT.TagSoup
 
         /// <summary>
         ///     Outputs this tag and all its contents.</summary>
+        /// <param name="allTags">
+        ///     The HTML specification allows certain start and end tags to be omitted. Specify <c>true</c> to emit such tags
+        ///     regardless, for compatibility reasons.</param>
         /// <returns>
         ///     A collection of strings which, when concatenated, represent this tag and all its contents.</returns>
-        public virtual IEnumerable<string> ToEnumerable()
+        public virtual IEnumerable<string> ToEnumerable(bool allTags = false)
         {
-            if (StartTag)
+            if (StartTag || allTags)
                 yield return "<" + TagName;
-            bool tagPrinted = StartTag;
+            bool tagPrinted = StartTag || allTags;
 
             foreach (var field in this.GetType().GetFields())
             {
@@ -208,7 +211,7 @@ namespace RT.TagSoup
             if (tagIncomplete)
                 yield return ">";
 
-            if (EndTag)
+            if (EndTag || allTags)
                 yield return "</" + TagName + ">";
         }
 
@@ -229,8 +232,20 @@ namespace RT.TagSoup
         ///     The entire tag tree as a single string.</returns>
         public override string ToString()
         {
+            return ToString(false);
+        }
+
+        /// <summary>
+        ///     Converts the entire tag tree into a single string.</summary>
+        /// <param name="allTags">
+        ///     The HTML specification allows certain start and end tags to be omitted. Specify <c>true</c> to emit such tags
+        ///     regardless, for compatibility reasons.</param>
+        /// <returns>
+        ///     The entire tag tree as a single string.</returns>
+        public string ToString(bool allTags)
+        {
             var sb = new StringBuilder();
-            foreach (string s in ToEnumerable())
+            foreach (string s in ToEnumerable(allTags))
                 sb.Append(s);
             return sb.ToString();
         }
@@ -261,9 +276,12 @@ namespace RT.TagSoup
 
         /// <summary>
         ///     Converts a tag tree into a string that is generated bit by bit.</summary>
+        /// <param name="allTags">
+        ///     The HTML specification allows certain start and end tags to be omitted. Specify <c>true</c> to emit such tags
+        ///     regardless, for compatibility reasons.</param>
         /// <returns>
         ///     A collection that generates the entire tag tree as a string.</returns>
-        public static IEnumerable<string> ToEnumerable(object tagTree)
+        public static IEnumerable<string> ToEnumerable(object tagTree, bool allTags = false)
         {
             if (tagTree == null)
                 return Enumerable.Empty<string>();
@@ -275,10 +293,10 @@ namespace RT.TagSoup
                 return ((IEnumerable<string>) tagTree).Select(s => s.HtmlEscape());
 
             if (tagTree is Tag)
-                return ((Tag) tagTree).ToEnumerable();
+                return ((Tag) tagTree).ToEnumerable(allTags);
 
             if (tagTree is IEnumerable)
-                return ((IEnumerable) tagTree).Cast<object>().SelectMany(ToEnumerable);
+                return ((IEnumerable) tagTree).Cast<object>().SelectMany(t => ToEnumerable(t, allTags));
 
             if (tagTree is Func<object> || (tagTree is Delegate && ((Delegate) tagTree).Method.GetParameters().Length == 0))
                 return ToEnumerable(((Delegate) tagTree).DynamicInvoke(null));
@@ -293,7 +311,7 @@ namespace RT.TagSoup
         ///         <item><c>class_</c> is converted to <c>"class"</c></item>
         ///         <item><c>acceptCharset</c> is converted to <c>"accept-charset"</c></item>
         ///         <item><c>text_plain</c> is converted to <c>"text/plain"</c></item>
-        ///         <item><c>_</c> would be converted to the empty string, but <see cref="ToEnumerable()"/> already skips
+        ///         <item><c>_</c> would be converted to the empty string, but <see cref="ToEnumerable(bool)"/> already skips
         ///         those.</item></list></example>
         /// <param name="fieldName">
         ///     Field name to convert.</param>
@@ -316,12 +334,15 @@ namespace RT.TagSoup
         ///     Creates a new file and outputs this tag and all its contents to it.</summary>
         /// <param name="filename">
         ///     The path and filename of the file to create. If the file already exists, it will be overwritten.</param>
-        public void WriteToFile(string filename)
+        /// <param name="allTags">
+        ///     The HTML specification allows certain start and end tags to be omitted. Specify <c>true</c> to emit such tags
+        ///     regardless, for compatibility reasons.</param>
+        public void WriteToFile(string filename, bool allTags = false)
         {
             using (var f = File.Open(filename, FileMode.Create, FileAccess.Write, FileShare.Write))
             using (var t = new StreamWriter(f))
             {
-                foreach (var str in ToEnumerable())
+                foreach (var str in ToEnumerable(allTags))
                     t.Write(str);
             }
         }
@@ -338,7 +359,7 @@ namespace RT.TagSoup
         /// <summary>Throws the not implemented exception.</summary>
         public override string TagName { get { throw new NotImplementedException(); } }
         /// <summary>Enumerates the content.</summary>
-        public override IEnumerable<string> ToEnumerable() { yield return _value; }
+        public override IEnumerable<string> ToEnumerable(bool allTags = false) { yield return _value; }
         /// <summary>Returns the content.</summary>
         public override string ToString() { return _value; }
     }
