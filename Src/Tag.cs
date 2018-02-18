@@ -198,7 +198,7 @@ namespace RT.TagSoup
             }
 
             var tagIncomplete = tagPrinted;
-            foreach (var element in Tag.ToEnumerable(_tagContents))
+            foreach (var element in Tag.ToEnumerable(_tagContents, allTags))
             {
                 if (tagIncomplete)
                 {
@@ -254,10 +254,10 @@ namespace RT.TagSoup
         ///     Converts a tag tree into a single string.</summary>
         /// <returns>
         ///     The entire tag tree as a single string.</returns>
-        public static string ToString(object tagTree)
+        public static string ToString(object tagTree, bool allTags = false)
         {
             var sb = new StringBuilder();
-            foreach (string s in ToEnumerable(tagTree))
+            foreach (string s in ToEnumerable(tagTree, allTags))
                 sb.Append(s);
             return sb.ToString();
         }
@@ -276,9 +276,6 @@ namespace RT.TagSoup
 
         /// <summary>
         ///     Converts a tag tree into a string that is generated bit by bit.</summary>
-        /// <param name="allTags">
-        ///     The HTML specification allows certain start and end tags to be omitted. Specify <c>true</c> to emit such tags
-        ///     regardless, for compatibility reasons.</param>
         /// <returns>
         ///     A collection that generates the entire tag tree as a string.</returns>
         public static IEnumerable<string> ToEnumerable(object tagTree, bool allTags = false)
@@ -299,7 +296,7 @@ namespace RT.TagSoup
                 return ((IEnumerable) tagTree).Cast<object>().SelectMany(t => ToEnumerable(t, allTags));
 
             if (tagTree is Func<object> || (tagTree is Delegate && ((Delegate) tagTree).Method.GetParameters().Length == 0))
-                return ToEnumerable(((Delegate) tagTree).DynamicInvoke(null));
+                return ToEnumerable(((Delegate) tagTree).DynamicInvoke(null), allTags);
 
             return new[] { tagTree.ToString().HtmlEscape() };
         }
