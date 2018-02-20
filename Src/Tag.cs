@@ -252,6 +252,11 @@ namespace RT.TagSoup
 
         /// <summary>
         ///     Converts a tag tree into a single string.</summary>
+        /// <param name="tagTree">
+        ///     The tag tree to convert.</param>
+        /// <param name="allTags">
+        ///     The HTML specification allows certain start and end tags to be omitted. Specify <c>true</c> to emit such tags
+        ///     regardless, for compatibility reasons.</param>
         /// <returns>
         ///     The entire tag tree as a single string.</returns>
         public static string ToString(object tagTree, bool allTags = false)
@@ -276,6 +281,11 @@ namespace RT.TagSoup
 
         /// <summary>
         ///     Converts a tag tree into a string that is generated bit by bit.</summary>
+        /// <param name="tagTree">
+        ///     The tag tree to convert.</param>
+        /// <param name="allTags">
+        ///     The HTML specification allows certain start and end tags to be omitted. Specify <c>true</c> to emit such tags
+        ///     regardless, for compatibility reasons.</param>
         /// <returns>
         ///     A collection that generates the entire tag tree as a string.</returns>
         public static IEnumerable<string> ToEnumerable(object tagTree, bool allTags = false)
@@ -355,7 +365,11 @@ namespace RT.TagSoup
         public RawTag(string value_) { _value = value_; }
         /// <summary>Throws the not implemented exception.</summary>
         public override string TagName { get { throw new NotImplementedException(); } }
-        /// <summary>Enumerates the content.</summary>
+        /// <summary>
+        ///     Enumerates the content.</summary>
+        /// <param name="allTags">
+        ///     The HTML specification allows certain start and end tags to be omitted. Specify <c>true</c> to emit such tags
+        ///     regardless, for compatibility reasons.</param>
         public override IEnumerable<string> ToEnumerable(bool allTags = false) { yield return _value; }
         /// <summary>Returns the content.</summary>
         public override string ToString() { return _value; }
