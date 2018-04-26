@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 
 namespace RT.TagSoup
@@ -38,11 +39,24 @@ namespace RT.TagSoup
         private IEnumerable _tagContents = null;
 
         /// <summary>Constructor.</summary>
-        public Tag() { _tagContents = null; }
+        public Tag()
+        {
+            _tagContents = null;
+            var type = GetType();
+            lock (_fieldCache)
+            {
+                if (!_fieldCache.TryGetValue(type, out _fields))
+                {
+                    _fields = type.GetFields().Where(f => f.Name.Length > 0 && f.Name[0] != '_').ToArray();
+                    _fieldCache[type] = _fields;
+                }
+            }
+        }
+
         /// <summary>Constructor.</summary>
-        public Tag(object[] contents) { _tagContents = contents; }
+        public Tag(object[] contents) : this() { _tagContents = contents; }
         /// <summary>Constructor.</summary>
-        public Tag(IEnumerable contents) { _tagContents = contents; }
+        public Tag(IEnumerable contents) : this() { _tagContents = contents; }
 
         /// <summary>Name of the tag.</summary>
         public abstract string TagName { get; }
@@ -50,6 +64,9 @@ namespace RT.TagSoup
         public virtual bool StartTag { get { return true; } }
         /// <summary>Whether the end tag should be printed.</summary>
         public virtual bool EndTag { get { return true; } }
+
+        private static Dictionary<Type, FieldInfo[]> _fieldCache = new Dictionary<Type, FieldInfo[]>();
+        private FieldInfo[] _fields;
 
         /// <summary>
         ///     Creates a simple HTML document from the specified elements.</summary>
@@ -154,10 +171,8 @@ namespace RT.TagSoup
                 yield return "<" + TagName;
             bool tagPrinted = StartTag || allTags;
 
-            foreach (var field in this.GetType().GetFields())
+            foreach (var field in _fields)
             {
-                if (field.Name.StartsWith("_"))
-                    continue;
                 object val = field.GetValue(this);
                 if (val == null) continue;
                 if (val is bool && !((bool) val))
