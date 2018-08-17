@@ -1146,6 +1146,7 @@ namespace RT.TagSoup
             yield return "<!DOCTYPE html>";
             foreach (var item in base.ToEnumerable(allTags))
                 yield return item;
+            yield return "<!--V1-->";
         }
         /// <summary>Stringifies the attributes on this tag.</summary>
         protected override IEnumerable<string> enumerateAttributes()
