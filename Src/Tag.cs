@@ -338,7 +338,7 @@ namespace RT.TagSoup
         protected override IEnumerable<string> enumerateAttributes() { throw new NotImplementedException(); }
     }
 
-    public static class GenerateCode
+    static class GenerateCode
     {
         public static void Do(string htmlCsPath)
         {
