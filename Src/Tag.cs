@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace RT.TagSoup
 {
@@ -39,20 +40,7 @@ namespace RT.TagSoup
         private IEnumerable _tagContents = null;
 
         /// <summary>Constructor.</summary>
-        public Tag()
-        {
-            _tagContents = null;
-            var type = GetType();
-            lock (_fieldCache)
-            {
-                if (!_fieldCache.TryGetValue(type, out _fields))
-                {
-                    _fields = type.GetFields().Where(f => f.Name.Length > 0 && f.Name[0] != '_').ToArray();
-                    _fieldCache[type] = _fields;
-                }
-            }
-        }
-
+        public Tag() { _tagContents = null; }
         /// <summary>Constructor.</summary>
         public Tag(object[] contents) : this() { _tagContents = contents; }
         /// <summary>Constructor.</summary>
@@ -64,9 +52,6 @@ namespace RT.TagSoup
         public virtual bool StartTag { get { return true; } }
         /// <summary>Whether the end tag should be printed.</summary>
         public virtual bool EndTag { get { return true; } }
-
-        private static Dictionary<Type, FieldInfo[]> _fieldCache = new Dictionary<Type, FieldInfo[]>();
-        private FieldInfo[] _fields;
 
         /// <summary>
         ///     Creates a simple HTML document from the specified elements.</summary>
@@ -167,36 +152,24 @@ namespace RT.TagSoup
         ///     A collection of strings which, when concatenated, represent this tag and all its contents.</returns>
         public virtual IEnumerable<string> ToEnumerable(bool allTags = false)
         {
-            if (StartTag || allTags)
-                yield return "<" + TagName;
-            bool tagPrinted = StartTag || allTags;
-
-            foreach (var field in _fields)
+            var tagPrinted = false;
+            if (StartTag || allTags || (_data != null && _data.Count > 0))
             {
-                object val = field.GetValue(this);
-                if (val == null) continue;
-                if (val is bool && !((bool) val))
-                    continue;
-                bool isEnum = field.FieldType.IsEnum;
-                if (isEnum && (int) val == 0)
-                    continue;
-
-                if (!tagPrinted)
-                {
-                    yield return "<" + TagName;
-                    tagPrinted = true;
-                }
-
-                yield return " " + fixFieldName(field.Name);
-                if (val is bool)
-                    continue;
-                yield return "=";
-
-                yield return attributeValue(
-                    isEnum && field.FieldType.IsDefined<FlagsAttribute>() ? string.Join(" ", Enum.GetValues(field.FieldType).Cast<object>().Where(v => ((int) v & (int) val) != 0).Select(v => fixFieldName(v.ToString()))) :
-                    isEnum ? fixFieldName(val.ToString()) :
-                    val.ToString());
+                yield return "<" + TagName;
+                tagPrinted = true;
             }
+
+            var attrs = enumerateAttributes();
+            if (attrs != null)
+                foreach (var str in attrs)
+                {
+                    if (!tagPrinted)
+                    {
+                        yield return "<" + TagName;
+                        tagPrinted = true;
+                    }
+                    yield return str;
+                }
 
             if (_data != null)
             {
@@ -212,33 +185,32 @@ namespace RT.TagSoup
                 }
             }
 
-            var tagIncomplete = tagPrinted;
-            foreach (var element in Tag.ToEnumerable(_tagContents, allTags))
-            {
-                if (tagIncomplete)
-                {
-                    yield return ">";
-                    tagIncomplete = false;
-                }
-                yield return element;
-            }
-
-            if (tagIncomplete)
+            if (tagPrinted)
                 yield return ">";
+
+            foreach (var element in Tag.ToEnumerable(_tagContents, allTags))
+                yield return element;
 
             if (EndTag || allTags)
                 yield return "</" + TagName + ">";
         }
 
-        private string attributeValue(string p)
+        /// <summary>Stringifies the attributes on this tag.</summary>
+        abstract protected IEnumerable<string> enumerateAttributes();
+
+        /// <summary>
+        ///     Helper method to safely stringify an attribute value.</summary>
+        /// <param name="attrVal">
+        ///     Attribute value to stringify.</param>
+        protected static string attributeValue(string attrVal)
         {
-            if (p.Length == 0)
+            if (attrVal.Length == 0)
                 return "''";
-            if (p.All(ch => !char.IsWhiteSpace(ch) && ch != '"' && ch != '\'' && ch != '=' && ch != '<' && ch != '>' && ch != '`'))
-                return p;
-            if (p.All(ch => ch != '\''))
-                return "'" + p.HtmlEscape(leaveDoubleQuotesAlone: true) + "'";
-            return "\"" + p.HtmlEscape(leaveSingleQuotesAlone: true) + "\"";
+            if (attrVal.All(ch => !char.IsWhiteSpace(ch) && ch != '"' && ch != '\'' && ch != '=' && ch != '<' && ch != '>' && ch != '`'))
+                return attrVal;
+            if (attrVal.All(ch => ch != '\''))
+                return "'" + attrVal.HtmlEscape(leaveDoubleQuotesAlone: true) + "'";
+            return "\"" + attrVal.HtmlEscape(leaveSingleQuotesAlone: true) + "\"";
         }
 
         /// <summary>
@@ -327,6 +299,140 @@ namespace RT.TagSoup
         }
 
         /// <summary>
+        ///     Creates a new file and outputs this tag and all its contents to it.</summary>
+        /// <param name="filename">
+        ///     The path and filename of the file to create. If the file already exists, it will be overwritten.</param>
+        /// <param name="allTags">
+        ///     The HTML specification allows certain start and end tags to be omitted. Specify <c>true</c> to emit such tags
+        ///     regardless, for compatibility reasons.</param>
+        public void WriteToFile(string filename, bool allTags = false)
+        {
+            using (var f = File.Open(filename, FileMode.Create, FileAccess.Write, FileShare.Write))
+            using (var t = new StreamWriter(f))
+            {
+                foreach (var str in ToEnumerable(allTags))
+                    t.Write(str);
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Outputs whatever content is passed to it without any escaping. Do not use unless there's absolutely no other way
+    ///     of doing something.</summary>
+    public sealed class RawTag : Tag
+    {
+        private readonly string _value;
+        /// <summary>Constructor.</summary>
+        public RawTag(string value_) { _value = value_; }
+        /// <summary>Throws NotImplementedException.</summary>
+        public override string TagName { get { throw new NotImplementedException(); } }
+        /// <summary>
+        ///     Enumerates the content.</summary>
+        /// <param name="allTags">
+        ///     The HTML specification allows certain start and end tags to be omitted. Specify <c>true</c> to emit such tags
+        ///     regardless, for compatibility reasons.</param>
+        public override IEnumerable<string> ToEnumerable(bool allTags = false) { yield return _value; }
+        /// <summary>Returns the content.</summary>
+        public override string ToString() { return _value; }
+        /// <summary>Throws NotImplementedException.</summary>
+        protected override IEnumerable<string> enumerateAttributes() { throw new NotImplementedException(); }
+    }
+
+    public static class GenerateCode
+    {
+        public static void Do(string htmlCsPath)
+        {
+            var exclude = "SCRIPTLiteral,STYLELiteral".Split(',');
+            var keywords = "abstract,as,base,bool,break,byte,case,catch,char,checked,class,const,continue,decimal,default,delegate,do,double,else,enum,event,explicit,extern,false,finally,fixed,float,for,foreach,goto,if,implicit,in,int,interface,internal,is,lock,long,namespace,new,null,object,operator,out,override,params,private,protected,public,readonly,ref,return,sbyte,sealed,short,sizeof,stackalloc,static,string,struct,switch,this,throw,true,try,typeof,uint,ulong,unchecked,unsafe,ushort,using,var,virtual,void,volatile,while".Split(',');
+            ReplaceInFile(htmlCsPath, @"/* HTML tags generated code START */", @"/* HTML tags generated code END */",
+                typeof(A).Assembly.GetTypes().Where(t => typeof(HtmlTag).IsAssignableFrom(t) && !t.IsAbstract && !exclude.Contains(t.Name)).Select(t =>
+                {
+                    var fields = t.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).Where(f => f.DeclaringType == t);
+                    return $@"
+    public sealed class {t.Name} : HtmlTag
+    {{
+        public {t.Name}() : base() {{ }}
+        public {t.Name}(params object[] contents) : base(contents) {{ }}
+        public override string TagName {{ get {{ return ""{t.Name.ToLowerInvariant()}""; }} }}{
+(((Tag) Activator.CreateInstance(t)).StartTag ? "" : "\r\n        public override bool StartTag { get { return false; } }")}{
+(((Tag) Activator.CreateInstance(t)).EndTag ? "" : "\r\n        public override bool EndTag { get { return false; } }")}{
+fields.Select(f => $"\r\n        public {typeName(f.FieldType)} {f.Name}{(keywords.Contains(f.Name) ? "_" : null)};").JoinString()}{
+(t.Name == "HTML" ? @"
+        public override IEnumerable<string> ToEnumerable(bool allTags = false)
+        {
+            yield return ""<!DOCTYPE html>"";
+            foreach (var item in base.ToEnumerable(allTags))
+                yield return item;
+        }" : "")}
+        {GenerateEnumerateAttributesMethod(fields, callBase: true).Indent("        ".Length, indentFirstLine: false)}
+    }}";
+                }).JoinString());
+            ReplaceInFile(htmlCsPath, @"/* HtmlTag generated code START */", @"/* HtmlTag generated code END */",
+                GenerateEnumerateAttributesMethod(typeof(HtmlTag).GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).Where(f => f.DeclaringType == typeof(HtmlTag)), callBase: false));
+        }
+
+        private static string GenerateEnumerateAttributesMethod(IEnumerable<FieldInfo> fields, bool callBase)
+        {
+            return $@"/// <summary>Stringifies the attributes on this tag.</summary>
+protected override IEnumerable<string> enumerateAttributes()
+{{
+    {(!fields.Any() && !callBase ? "return null;" : fields.Select(f =>
+            {
+                if (f.FieldType == typeof(bool))
+                    return $@"if ({f.Name}) yield return "" {fixFieldName(f.Name)}"";";
+                if (f.FieldType.IsEnum && f.FieldType.IsDefined<FlagsAttribute>())
+                    return $@"if ({f.Name} != 0)
+    {{
+        var str = """";
+        {Enum.GetValues(f.FieldType).Cast<object>().Where(v => (int) v != 0).Select(v => $@"if (({f.Name} & {f.FieldType.Name}.{v}) != 0) {{ if (str.Length > 0) str += "" ""; str += ""{fixFieldName(v.ToString())}""; }}").JoinString("\r\n        ")}
+        yield return "" {fixFieldName(f.Name)}="" + attributeValue(str);
+    }}";
+                if (f.FieldType.IsEnum)
+                    return $@"switch ({f.Name}) {{ {Enum.GetValues(f.FieldType).Cast<object>().Where(v => (int) v != 0).Select(v => $@"case {f.FieldType.Name}.{v}: yield return "" {fixFieldName(f.Name)}={fixFieldName(v.ToString())}""; break;").JoinString(" ")} }}";
+                if (f.FieldType == typeof(double))
+                    return $@"yield return "" {fixFieldName(f.Name)}=""; yield return attributeValue({f.Name}.ToString());";
+                return $@"if ({f.Name} != null) {{ yield return "" {fixFieldName(f.Name)}=""; yield return attributeValue({f.Name}{(f.FieldType == typeof(string) ? null : ".ToString()")}); }}";
+            }).JoinString("\r\n    "))}{
+    (callBase ? @"
+    var baseAttrs = base.enumerateAttributes();
+    if (baseAttrs != null)
+        foreach (var obj in baseAttrs)
+            yield return obj;" : null)}
+}}";
+        }
+
+        /// <summary>
+        ///     Inserts spaces at the beginning of every line contained within the specified string.</summary>
+        /// <param name="str">
+        ///     String to add indentation to.</param>
+        /// <param name="by">
+        ///     Number of spaces to add.</param>
+        /// <param name="indentFirstLine">
+        ///     If true (default), all lines are indented; otherwise, all lines except the first.</param>
+        /// <returns>
+        ///     The indented string.</returns>
+        private static string Indent(this string str, int by, bool indentFirstLine = true)
+        {
+            if (indentFirstLine)
+                return Regex.Replace(str, "^", new string(' ', by), RegexOptions.Multiline);
+            return Regex.Replace(str, "(?<=\n)", new string(' ', by));
+        }
+
+        /// <summary>
+        ///     Removes the overall indentation of the specified string while maintaining the relative indentation of each
+        ///     line.</summary>
+        /// <param name="str">
+        ///     String to remove indentation from.</param>
+        /// <returns>
+        ///     A string in which every line that isn’t all whitespace has had spaces removed from the beginning equal to the
+        ///     least amount of spaces at the beginning of any line.</returns>
+        private static string Unindent(this string str)
+        {
+            var least = Regex.Matches(str, @"^( *)(?![\r\n ]|\z)", RegexOptions.Multiline).Cast<Match>().Min(m => m.Groups[1].Length);
+            return least == 0 ? str : Regex.Replace(str, "^" + new string(' ', least), "", RegexOptions.Multiline);
+        }
+
+        /// <summary>
         ///     Converts a C#-compatible field name into an HTML/XHTML-compatible one.</summary>
         /// <example>
         ///     <list type="bullet">
@@ -352,41 +458,87 @@ namespace RT.TagSoup
             return sb.ToString();
         }
 
-        /// <summary>
-        ///     Creates a new file and outputs this tag and all its contents to it.</summary>
-        /// <param name="filename">
-        ///     The path and filename of the file to create. If the file already exists, it will be overwritten.</param>
-        /// <param name="allTags">
-        ///     The HTML specification allows certain start and end tags to be omitted. Specify <c>true</c> to emit such tags
-        ///     regardless, for compatibility reasons.</param>
-        public void WriteToFile(string filename, bool allTags = false)
+        private static string typeName(Type type)
         {
-            using (var f = File.Open(filename, FileMode.Create, FileAccess.Write, FileShare.Write))
-            using (var t = new StreamWriter(f))
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+                return typeName(type.GenericTypeArguments[0]) + "?";
+            if (type.IsArray)
+                return typeName(type.GetElementType()) + "[]";
+            if (type == typeof(double))
+                return "double";
+            if (type == typeof(string))
+                return "string";
+            if (type == typeof(int))
+                return "int";
+            if (type == typeof(bool))
+                return "bool";
+            return type.Name;
+        }
+
+        private static void ReplaceInFile(string path, string startMarker, string endMarker, string newText)
+        {
+            File.WriteAllText(path, Regex.Replace(File.ReadAllText(path), $@"(?<={Regex.Escape(startMarker)})(\r?\n)*( *).*?(\r?\n *)?(?={Regex.Escape(endMarker)})", m => m.Groups[1].Value + newText.Unindent().Indent(m.Groups[2].Length) + m.Groups[3].Value, RegexOptions.Singleline));
+        }
+
+        /// <summary>
+        ///     Turns all elements in the enumerable to strings and joins them using the specified <paramref
+        ///     name="separator"/> and the specified <paramref name="prefix"/> and <paramref name="suffix"/> for each string.</summary>
+        /// <param name="values">
+        ///     The sequence of elements to join into a string.</param>
+        /// <param name="separator">
+        ///     Optionally, a separator to insert between each element and the next.</param>
+        /// <param name="prefix">
+        ///     Optionally, a string to insert in front of each element.</param>
+        /// <param name="suffix">
+        ///     Optionally, a string to insert after each element.</param>
+        /// <param name="lastSeparator">
+        ///     Optionally, a separator to use between the second-to-last and the last element.</param>
+        /// <example>
+        ///     <code>
+        ///         // Returns "[Paris], [London], [Tokyo]"
+        ///         (new[] { "Paris", "London", "Tokyo" }).JoinString(", ", "[", "]")
+        ///         
+        ///         // Returns "[Paris], [London] and [Tokyo]"
+        ///         (new[] { "Paris", "London", "Tokyo" }).JoinString(", ", "[", "]", " and ");</code></example>
+        private static string JoinString<T>(this IEnumerable<T> values, string separator = null, string prefix = null, string suffix = null, string lastSeparator = null)
+        {
+            if (values == null)
+                throw new ArgumentNullException("values");
+            if (lastSeparator == null)
+                lastSeparator = separator;
+
+            using (var enumerator = values.GetEnumerator())
             {
-                foreach (var str in ToEnumerable(allTags))
-                    t.Write(str);
+                if (!enumerator.MoveNext())
+                    return "";
+
+                // Optimise the case where there is only one element
+                var one = enumerator.Current;
+                if (!enumerator.MoveNext())
+                    return prefix + one + suffix;
+
+                // Optimise the case where there are only two elements
+                var two = enumerator.Current;
+                if (!enumerator.MoveNext())
+                {
+                    // Optimise the (common) case where there is no prefix/suffix; this prevents an array allocation when calling string.Concat()
+                    if (prefix == null && suffix == null)
+                        return one + lastSeparator + two;
+                    return prefix + one + suffix + lastSeparator + prefix + two + suffix;
+                }
+
+                StringBuilder sb = new StringBuilder()
+                    .Append(prefix).Append(one).Append(suffix).Append(separator)
+                    .Append(prefix).Append(two).Append(suffix);
+                var prev = enumerator.Current;
+                while (enumerator.MoveNext())
+                {
+                    sb.Append(separator).Append(prefix).Append(prev).Append(suffix);
+                    prev = enumerator.Current;
+                }
+                sb.Append(lastSeparator).Append(prefix).Append(prev).Append(suffix);
+                return sb.ToString();
             }
         }
-    }
-
-    /// <summary>
-    ///     Outputs whatever content is passed to it without any escaping. Do not use unless there's absolutely no other way
-    ///     of doing something.</summary>
-    public sealed class RawTag : Tag
-    {
-        private string _value;
-        /// <summary>Constructor.</summary>
-        public RawTag(string value_) { _value = value_; }
-        /// <summary>Throws the not implemented exception.</summary>
-        public override string TagName { get { throw new NotImplementedException(); } }
-        /// <summary>
-        ///     Enumerates the content.</summary>
-        /// <param name="allTags">
-        ///     The HTML specification allows certain start and end tags to be omitted. Specify <c>true</c> to emit such tags
-        ///     regardless, for compatibility reasons.</param>
-        public override IEnumerable<string> ToEnumerable(bool allTags = false) { yield return _value; }
-        /// <summary>Returns the content.</summary>
-        public override string ToString() { return _value; }
     }
 }
