@@ -196,22 +196,17 @@ namespace RT.TagSoup
         }
 
         /// <summary>Stringifies the attributes on this tag.</summary>
-        abstract protected IEnumerable<string> enumerateAttributes();
+        protected abstract IEnumerable<string> enumerateAttributes();
 
         /// <summary>
         ///     Helper method to safely stringify an attribute value.</summary>
         /// <param name="attrVal">
         ///     Attribute value to stringify.</param>
-        protected static string attributeValue(string attrVal)
-        {
-            if (attrVal.Length == 0)
-                return "''";
-            if (attrVal.All(ch => !char.IsWhiteSpace(ch) && ch != '"' && ch != '\'' && ch != '=' && ch != '<' && ch != '>' && ch != '`'))
-                return attrVal;
-            if (attrVal.All(ch => ch != '\''))
-                return "'" + attrVal.HtmlEscape(leaveDoubleQuotesAlone: true) + "'";
-            return "\"" + attrVal.HtmlEscape(leaveSingleQuotesAlone: true) + "\"";
-        }
+        protected static string attributeValue(string attrVal) =>
+            attrVal.Length == 0 ? "''" :
+            attrVal.All(ch => !char.IsWhiteSpace(ch) && ch != '"' && ch != '\'' && ch != '=' && ch != '<' && ch != '>' && ch != '`') ? attrVal :
+            attrVal.All(ch => ch != '\'') ? "'" + attrVal.HtmlEscape(leaveDoubleQuotesAlone: true) + "'" :
+            "\"" + attrVal.HtmlEscape(leaveSingleQuotesAlone: true) + "\"";
 
         /// <summary>
         ///     Converts the entire tag tree into a single string.</summary>
@@ -275,28 +270,15 @@ namespace RT.TagSoup
         ///     regardless, for compatibility reasons.</param>
         /// <returns>
         ///     A collection that generates the entire tag tree as a string.</returns>
-        public static IEnumerable<string> ToEnumerable(object tagTree, bool allTags = false)
-        {
-            if (tagTree == null)
-                return Enumerable.Empty<string>();
-
-            if (tagTree is string)
-                return new[] { ((string) tagTree).HtmlEscape() };
-
-            if (tagTree is IEnumerable<string>)
-                return ((IEnumerable<string>) tagTree).Select(s => s.HtmlEscape());
-
-            if (tagTree is Tag)
-                return ((Tag) tagTree).ToEnumerable(allTags);
-
-            if (tagTree is IEnumerable)
-                return ((IEnumerable) tagTree).Cast<object>().SelectMany(t => ToEnumerable(t, allTags));
-
-            if (tagTree is Func<object> || (tagTree is Delegate && ((Delegate) tagTree).Method.GetParameters().Length == 0))
-                return ToEnumerable(((Delegate) tagTree).DynamicInvoke(null), allTags);
-
-            return new[] { tagTree.ToString().HtmlEscape() };
-        }
+        public static IEnumerable<string> ToEnumerable(object tagTree, bool allTags = false) =>
+            tagTree == null ? Enumerable.Empty<string>() :
+            tagTree is string tagStr ? new[] { tagStr.HtmlEscape() } :
+            tagTree is Tag tag ? tag.ToEnumerable(allTags) :
+            tagTree is IEnumerable<string> tagIEnumerableT ? tagIEnumerableT.Select(s => s.HtmlEscape()) :
+            tagTree is IEnumerable tagIEnumerable ? tagIEnumerable.Cast<object>().SelectMany(t => ToEnumerable(t, allTags)) :
+            tagTree is Func<object> func ? ToEnumerable(func(), allTags) :
+            tagTree is Delegate dlg && dlg.Method.GetParameters().Length == 0 ? ToEnumerable(dlg.DynamicInvoke(null), allTags) :
+            new[] { tagTree.ToString().HtmlEscape() };
 
         /// <summary>
         ///     Creates a new file and outputs this tag and all its contents to it.</summary>
@@ -309,10 +291,8 @@ namespace RT.TagSoup
         {
             using (var f = File.Open(filename, FileMode.Create, FileAccess.Write, FileShare.Write))
             using (var t = new StreamWriter(f))
-            {
                 foreach (var str in ToEnumerable(allTags))
                     t.Write(str);
-            }
         }
     }
 
@@ -377,22 +357,17 @@ fields.Select(f => $"\r\n        public {typeName(f.FieldType)} {f.Name}{(keywor
 protected override IEnumerable<string> enumerateAttributes()
 {{
     {(!fields.Any() && !callBase ? "return null;" : fields.Select(f =>
-            {
-                if (f.FieldType == typeof(bool))
-                    return $@"if ({f.Name}) yield return "" {fixFieldName(f.Name)}"";";
-                if (f.FieldType.IsEnum && f.FieldType.IsDefined<FlagsAttribute>())
-                    return $@"if ({f.Name} != 0)
+                f.FieldType == typeof(bool) ? $@"if ({f.Name}) yield return "" {fixFieldName(f.Name)}"";" :
+                f.FieldType.IsEnum && f.FieldType.IsDefined<FlagsAttribute>() ? $@"if ({f.Name} != 0)
     {{
         var str = """";
         {Enum.GetValues(f.FieldType).Cast<object>().Where(v => (int) v != 0).Select(v => $@"if (({f.Name} & {f.FieldType.Name}.{v}) != 0) {{ if (str.Length > 0) str += "" ""; str += ""{fixFieldName(v.ToString())}""; }}").JoinString("\r\n        ")}
         yield return "" {fixFieldName(f.Name)}="" + attributeValue(str);
-    }}";
-                if (f.FieldType.IsEnum)
-                    return $@"switch ({f.Name}) {{ {Enum.GetValues(f.FieldType).Cast<object>().Where(v => (int) v != 0).Select(v => $@"case {f.FieldType.Name}.{v}: yield return "" {fixFieldName(f.Name)}={fixFieldName(v.ToString())}""; break;").JoinString(" ")} }}";
-                if (f.FieldType == typeof(double))
-                    return $@"yield return "" {fixFieldName(f.Name)}=""; yield return attributeValue({f.Name}.ToString());";
-                return $@"if ({f.Name} != null) {{ yield return "" {fixFieldName(f.Name)}=""; yield return attributeValue({f.Name}{(f.FieldType == typeof(string) ? null : ".ToString()")}); }}";
-            }).JoinString("\r\n    "))}{
+    }}" :
+                f.FieldType.IsEnum ? $@"switch ({f.Name}) {{ {Enum.GetValues(f.FieldType).Cast<object>().Where(v => (int) v != 0).Select(v => $@"case {f.FieldType.Name}.{v}: yield return "" {fixFieldName(f.Name)}={fixFieldName(v.ToString())}""; break;").JoinString(" ")} }}" :
+                f.FieldType == typeof(double) ? $@"yield return "" {fixFieldName(f.Name)}=""; yield return attributeValue({f.Name}.ToString());" :
+                $@"if ({f.Name} != null) {{ yield return "" {fixFieldName(f.Name)}=""; yield return attributeValue({f.Name}{(f.FieldType == typeof(string) ? null : ".ToString()")}); }}"
+            ).JoinString("\r\n    "))}{
     (callBase ? @"
     var baseAttrs = base.enumerateAttributes();
     if (baseAttrs != null)
@@ -411,12 +386,9 @@ protected override IEnumerable<string> enumerateAttributes()
         ///     If true (default), all lines are indented; otherwise, all lines except the first.</param>
         /// <returns>
         ///     The indented string.</returns>
-        private static string Indent(this string str, int by, bool indentFirstLine = true)
-        {
-            if (indentFirstLine)
-                return Regex.Replace(str, "^", new string(' ', by), RegexOptions.Multiline);
-            return Regex.Replace(str, "(?<=\n)", new string(' ', by));
-        }
+        private static string Indent(this string str, int by, bool indentFirstLine = true) => indentFirstLine
+                ? Regex.Replace(str, "^", new string(' ', by), RegexOptions.Multiline)
+                : Regex.Replace(str, "(?<=\n)", new string(' ', by));
 
         /// <summary>
         ///     Removes the overall indentation of the specified string while maintaining the relative indentation of each
@@ -439,7 +411,7 @@ protected override IEnumerable<string> enumerateAttributes()
         ///         <item><c>class_</c> is converted to <c>"class"</c></item>
         ///         <item><c>acceptCharset</c> is converted to <c>"accept-charset"</c></item>
         ///         <item><c>text_plain</c> is converted to <c>"text/plain"</c></item>
-        ///         <item><c>_</c> would be converted to the empty string, but <see cref="ToEnumerable(bool)"/> already skips
+        ///         <item><c>_</c> would be converted to the empty string, but <see cref="Tag.ToEnumerable(bool)"/> already skips
         ///         those.</item></list></example>
         /// <param name="fieldName">
         ///     Field name to convert.</param>
@@ -458,22 +430,14 @@ protected override IEnumerable<string> enumerateAttributes()
             return sb.ToString();
         }
 
-        private static string typeName(Type type)
-        {
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
-                return typeName(type.GenericTypeArguments[0]) + "?";
-            if (type.IsArray)
-                return typeName(type.GetElementType()) + "[]";
-            if (type == typeof(double))
-                return "double";
-            if (type == typeof(string))
-                return "string";
-            if (type == typeof(int))
-                return "int";
-            if (type == typeof(bool))
-                return "bool";
-            return type.Name;
-        }
+        private static string typeName(Type type) =>
+            type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>) ? typeName(type.GenericTypeArguments[0]) + "?" :
+            type.IsArray ? typeName(type.GetElementType()) + "[]" :
+            type == typeof(double) ? "double" :
+            type == typeof(string) ? "string" :
+            type == typeof(int) ? "int" :
+            type == typeof(bool) ? "bool" :
+            type.Name;
 
         private static void ReplaceInFile(string path, string startMarker, string endMarker, string newText)
         {
@@ -512,22 +476,18 @@ protected override IEnumerable<string> enumerateAttributes()
                 if (!enumerator.MoveNext())
                     return "";
 
-                // Optimise the case where there is only one element
+                // Optimize the case where there is only one element
                 var one = enumerator.Current;
                 if (!enumerator.MoveNext())
                     return prefix + one + suffix;
 
-                // Optimise the case where there are only two elements
+                // Optimize the case where there are only two elements
                 var two = enumerator.Current;
                 if (!enumerator.MoveNext())
-                {
-                    // Optimise the (common) case where there is no prefix/suffix; this prevents an array allocation when calling string.Concat()
-                    if (prefix == null && suffix == null)
-                        return one + lastSeparator + two;
-                    return prefix + one + suffix + lastSeparator + prefix + two + suffix;
-                }
+                    // Optimize the (common) case where there is no prefix/suffix; this prevents an array allocation when calling string.Concat()
+                    return prefix == null && suffix == null ? one + lastSeparator + two : prefix + one + suffix + lastSeparator + prefix + two + suffix;
 
-                StringBuilder sb = new StringBuilder()
+                var sb = new StringBuilder()
                     .Append(prefix).Append(one).Append(suffix).Append(separator)
                     .Append(prefix).Append(two).Append(suffix);
                 var prev = enumerator.Current;
