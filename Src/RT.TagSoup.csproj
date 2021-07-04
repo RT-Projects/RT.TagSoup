@@ -5,7 +5,6 @@
     <OutputPath>..\Builds\$(Configuration)-$(TargetFramework)$(RuntimeIdentifier)\</OutputPath>
     <IntermediateOutputPath>$(BaseIntermediateOutputPath)\$(Configuration)-$(TargetFramework)$(RuntimeIdentifier)\</IntermediateOutputPath>
     <DocumentationFile>$(OutputPath)\$(AssemblyName).xml</DocumentationFile>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 
     <Version>1.0.0.9999</Version>
     <Authors>Timwi;rstarkov</Authors>
