@@ -2,10 +2,9 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <OutputType>Library</OutputType>
-    <OutputPath>..\Builds\$(Configuration)</OutputPath>
-    <IntermediateOutputPath>..\Builds\$(Configuration)\obj-$(AssemblyName)</IntermediateOutputPath>
-    <BaseIntermediateOutputPath>..\Builds\$(Configuration)\obj-$(AssemblyName)</BaseIntermediateOutputPath>
-    <DocumentationFile>..\Builds\$(Configuration)\$(AssemblyName).xml</DocumentationFile>
+    <OutputPath>..\Builds\$(Configuration)-$(TargetFramework)$(RuntimeIdentifier)\</OutputPath>
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)\$(Configuration)-$(TargetFramework)$(RuntimeIdentifier)\</IntermediateOutputPath>
+    <DocumentationFile>$(OutputPath)\$(AssemblyName).xml</DocumentationFile>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
 </Project>
