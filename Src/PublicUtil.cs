@@ -14,7 +14,7 @@
             var pos = str.IndexOf(accel);
             return pos >= 0
                 ? new object[] { str.Substring(0, pos), new KBD(accel), str.Substring(pos + 1) }
-                : new object[] { str, " (", new KBD(accel), ")" };
+                : [str, " (", new KBD(accel), ")"];
         }
     }
 }

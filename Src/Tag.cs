@@ -125,7 +125,7 @@ namespace RT.TagSoup
         public Tag Data(string key, object value)
         {
             if (value != null)
-                (_data ?? (_data = new Dictionary<string, object>()))[key] = value;
+                (_data ??= [])[key] = value;
             return this;
         }
 
@@ -137,7 +137,7 @@ namespace RT.TagSoup
         {
             if (_tagContents == null)
                 _tagContents = new List<object>();
-            else if (!(_tagContents is List<object>))
+            else if (_tagContents is not List<object>)
                 _tagContents = _tagContents.Cast<object>().ToList();
 
             ((List<object>) _tagContents).Add(content);
@@ -271,14 +271,14 @@ namespace RT.TagSoup
         /// <returns>
         ///     A collection that generates the entire tag tree as a string.</returns>
         public static IEnumerable<string> ToEnumerable(object tagTree, bool allTags = false) =>
-            tagTree == null ? Enumerable.Empty<string>() :
-            tagTree is string tagStr ? new[] { tagStr.HtmlEscape() } :
+            tagTree == null ? [] :
+            tagTree is string tagStr ? [tagStr.HtmlEscape()] :
             tagTree is Tag tag ? tag.ToEnumerable(allTags) :
             tagTree is IEnumerable<string> tagIEnumerableT ? tagIEnumerableT.Select(s => s.HtmlEscape()) :
             tagTree is IEnumerable tagIEnumerable ? tagIEnumerable.Cast<object>().SelectMany(t => ToEnumerable(t, allTags)) :
             tagTree is Func<object> func ? ToEnumerable(func(), allTags) :
             tagTree is Delegate dlg && dlg.Method.GetParameters().Length == 0 ? ToEnumerable(dlg.DynamicInvoke(null), allTags) :
-            new[] { tagTree.ToString().HtmlEscape() };
+            [tagTree.ToString().HtmlEscape()];
 
         /// <summary>
         ///     Creates a new file and outputs this tag and all its contents to it.</summary>
@@ -289,21 +289,18 @@ namespace RT.TagSoup
         ///     regardless, for compatibility reasons.</param>
         public void WriteToFile(string filename, bool allTags = false)
         {
-            using (var f = File.Open(filename, FileMode.Create, FileAccess.Write, FileShare.Write))
-            using (var t = new StreamWriter(f))
-                foreach (var str in ToEnumerable(allTags))
-                    t.Write(str);
+            using var f = File.Open(filename, FileMode.Create, FileAccess.Write, FileShare.Write);
+            using var t = new StreamWriter(f);
+            foreach (var str in ToEnumerable(allTags))
+                t.Write(str);
         }
     }
 
     /// <summary>
     ///     Outputs whatever content is passed to it without any escaping. Do not use unless there's absolutely no other way
     ///     of doing something.</summary>
-    public sealed class RawTag : Tag
+    public sealed class RawTag(string value_) : Tag
     {
-        private readonly string _value;
-        /// <summary>Constructor.</summary>
-        public RawTag(string value_) { _value = value_; }
         /// <summary>Throws NotImplementedException.</summary>
         public override string TagName { get { throw new NotImplementedException(); } }
         /// <summary>
@@ -311,9 +308,9 @@ namespace RT.TagSoup
         /// <param name="allTags">
         ///     The HTML specification allows certain start and end tags to be omitted. Specify <c>true</c> to emit such tags
         ///     regardless, for compatibility reasons.</param>
-        public override IEnumerable<string> ToEnumerable(bool allTags = false) { yield return _value; }
+        public override IEnumerable<string> ToEnumerable(bool allTags = false) { yield return value_; }
         /// <summary>Returns the content.</summary>
-        public override string ToString() { return _value; }
+        public override string ToString() { return value_; }
         /// <summary>Throws NotImplementedException.</summary>
         protected override IEnumerable<string> enumerateAttributes() { throw new NotImplementedException(); }
     }
@@ -328,24 +325,24 @@ namespace RT.TagSoup
                 typeof(A).Assembly.GetTypes().Where(t => typeof(HtmlTag).IsAssignableFrom(t) && !t.IsAbstract && !exclude.Contains(t.Name)).Select(t =>
                 {
                     var fields = t.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).Where(f => f.DeclaringType == t);
-                    return $@"
-    public sealed class {t.Name} : HtmlTag
-    {{
-        public {t.Name}() : base() {{ }}
-        public {t.Name}(params object[] contents) : base(contents) {{ }}
-        public override string TagName {{ get {{ return ""{t.Name.ToLowerInvariant()}""; }} }}{
-(((Tag) Activator.CreateInstance(t)).StartTag ? "" : "\r\n        public override bool StartTag { get { return false; } }")}{
-(((Tag) Activator.CreateInstance(t)).EndTag ? "" : "\r\n        public override bool EndTag { get { return false; } }")}{
-fields.Select(f => $"\r\n        public {typeName(f.FieldType)} {f.Name}{(keywords.Contains(f.Name) ? "_" : null)};").JoinString()}{
-(t.Name == "HTML" ? @"
-        public override IEnumerable<string> ToEnumerable(bool allTags = false)
-        {
-            yield return ""<!DOCTYPE html>"";
-            foreach (var item in base.ToEnumerable(allTags))
-                yield return item;
-        }" : "")}
-        {GenerateEnumerateAttributesMethod(fields, callBase: true).Indent("        ".Length, indentFirstLine: false)}
-    }}";
+                    return $$"""
+
+                        public sealed class {{t.Name}} : HtmlTag
+                        {
+                            public {{t.Name}}() : base() { }
+                            public {{t.Name}}(params object[] contents) : base(contents) { }
+                            public override string TagName { get { return "{{t.Name.ToLowerInvariant()}}"; } }{{(((Tag) Activator.CreateInstance(t)).StartTag ? "" : "\r\n        public override bool StartTag { get { return false; } }")}}{{(((Tag) Activator.CreateInstance(t)).EndTag ? "" : "\r\n        public override bool EndTag { get { return false; } }")}}{{fields.Select(f => $"\r\n        public {typeName(f.FieldType)} {f.Name}{(keywords.Contains(f.Name) ? "_" : null)};").JoinString()}}{{(t.Name == "HTML" ? """
+
+                                    public override IEnumerable<string> ToEnumerable(bool allTags = false)
+                                    {
+                                        yield return "<!DOCTYPE html>";
+                                        foreach (var item in base.ToEnumerable(allTags))
+                                            yield return item;
+                                    }
+                            """ : "")}}
+                            {{GenerateEnumerateAttributesMethod(fields, callBase: true).Indent("        ".Length, indentFirstLine: false)}}
+                        }
+                    """;
                 }).JoinString());
             ReplaceInFile(htmlCsPath, @"/* HtmlTag generated code START */", @"/* HtmlTag generated code END */",
                 GenerateEnumerateAttributesMethod(typeof(HtmlTag).GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).Where(f => f.DeclaringType == typeof(HtmlTag)), callBase: false));
@@ -353,27 +350,32 @@ fields.Select(f => $"\r\n        public {typeName(f.FieldType)} {f.Name}{(keywor
 
         private static string GenerateEnumerateAttributesMethod(IEnumerable<FieldInfo> fields, bool callBase)
         {
-            return $@"/// <summary>Stringifies the attributes on this tag.</summary>
-protected override IEnumerable<string> enumerateAttributes()
-{{
-    {(!fields.Any() && !callBase ? "return null;" : fields.Select(f =>
-                f.FieldType == typeof(bool) ? $@"if ({f.Name}) yield return "" {fixFieldName(f.Name)}"";" :
-                f.FieldType.IsEnum && f.FieldType.IsDefined<FlagsAttribute>() ? $@"if ({f.Name} != 0)
-    {{
-        var str = """";
-        {Enum.GetValues(f.FieldType).Cast<object>().Where(v => (int) v != 0).Select(v => $@"if (({f.Name} & {f.FieldType.Name}.{v}) != 0) {{ if (str.Length > 0) str += "" ""; str += ""{fixFieldName(v.ToString())}""; }}").JoinString("\r\n        ")}
-        yield return "" {fixFieldName(f.Name)}="" + attributeValue(str);
-    }}" :
-                f.FieldType.IsEnum ? $@"switch ({f.Name}) {{ {Enum.GetValues(f.FieldType).Cast<object>().Where(v => (int) v != 0).Select(v => $@"case {f.FieldType.Name}.{v}: yield return "" {fixFieldName(f.Name)}={fixFieldName(v.ToString())}""; break;").JoinString(" ")} }}" :
-                f.FieldType == typeof(double) ? $@"yield return "" {fixFieldName(f.Name)}=""; yield return attributeValue({f.Name}.ToString());" :
-                $@"if ({f.Name} != null) {{ yield return "" {fixFieldName(f.Name)}=""; yield return attributeValue({f.Name}{(f.FieldType == typeof(string) ? null : ".ToString()")}); }}"
-            ).JoinString("\r\n    "))}{
-    (callBase ? @"
-    var baseAttrs = base.enumerateAttributes();
-    if (baseAttrs != null)
-        foreach (var obj in baseAttrs)
-            yield return obj;" : null)}
-}}";
+            return $$"""
+                /// <summary>Stringifies the attributes on this tag.</summary>
+                protected override IEnumerable<string> enumerateAttributes()
+                {
+                    {{(!fields.Any() && !callBase ? "return null;" : fields.Select(f =>
+                            f.FieldType == typeof(bool) ? $@"if ({f.Name}) yield return "" {fixFieldName(f.Name)}"";" :
+                            f.FieldType.IsEnum && f.FieldType.IsDefined<FlagsAttribute>() ? $$"""
+                            if ({{f.Name}} != 0)
+                                {
+                                    var str = "";
+                                    {{Enum.GetValues(f.FieldType).Cast<object>().Where(v => (int) v != 0).Select(v => $@"if (({f.Name} & {f.FieldType.Name}.{v}) != 0) {{ if (str.Length > 0) str += "" ""; str += ""{fixFieldName(v.ToString())}""; }}").JoinString("\r\n        ")}}
+                                    yield return " {{fixFieldName(f.Name)}}=" + attributeValue(str);
+                                }
+                            """ :
+                            f.FieldType.IsEnum ? $@"switch ({f.Name}) {{ {Enum.GetValues(f.FieldType).Cast<object>().Where(v => (int) v != 0).Select(v => $@"case {f.FieldType.Name}.{v}: yield return "" {fixFieldName(f.Name)}={fixFieldName(v.ToString())}""; break;").JoinString(" ")} }}" :
+                            f.FieldType == typeof(double) ? $@"yield return "" {fixFieldName(f.Name)}=""; yield return attributeValue({f.Name}.ToString());" :
+                            $@"if ({f.Name} != null) {{ yield return "" {fixFieldName(f.Name)}=""; yield return attributeValue({f.Name}{(f.FieldType == typeof(string) ? null : ".ToString()")}); }}"
+                        ).JoinString("\r\n    "))}}{{(callBase ? """
+
+                            var baseAttrs = base.enumerateAttributes();
+                            if (baseAttrs != null)
+                                foreach (var obj in baseAttrs)
+                                    yield return obj;
+                        """ : null)}}
+                }
+                """;
         }
 
         /// <summary>
@@ -411,8 +413,8 @@ protected override IEnumerable<string> enumerateAttributes()
         ///         <item><c>class_</c> is converted to <c>"class"</c></item>
         ///         <item><c>acceptCharset</c> is converted to <c>"accept-charset"</c></item>
         ///         <item><c>text_plain</c> is converted to <c>"text/plain"</c></item>
-        ///         <item><c>_</c> would be converted to the empty string, but <see cref="Tag.ToEnumerable(bool)"/> already skips
-        ///         those.</item></list></example>
+        ///         <item><c>_</c> would be converted to the empty string, but <see cref="Tag.ToEnumerable(bool)"/> already
+        ///         skips those.</item></list></example>
         /// <param name="fieldName">
         ///     Field name to convert.</param>
         /// <returns>
@@ -468,37 +470,34 @@ protected override IEnumerable<string> enumerateAttributes()
         {
             if (values == null)
                 throw new ArgumentNullException("values");
-            if (lastSeparator == null)
-                lastSeparator = separator;
+            lastSeparator ??= separator;
 
-            using (var enumerator = values.GetEnumerator())
+            using var enumerator = values.GetEnumerator();
+            if (!enumerator.MoveNext())
+                return "";
+
+            // Optimize the case where there is only one element
+            var one = enumerator.Current;
+            if (!enumerator.MoveNext())
+                return prefix + one + suffix;
+
+            // Optimize the case where there are only two elements
+            var two = enumerator.Current;
+            if (!enumerator.MoveNext())
+                // Optimize the (common) case where there is no prefix/suffix; this prevents an array allocation when calling string.Concat()
+                return prefix == null && suffix == null ? one + lastSeparator + two : prefix + one + suffix + lastSeparator + prefix + two + suffix;
+
+            var sb = new StringBuilder()
+                .Append(prefix).Append(one).Append(suffix).Append(separator)
+                .Append(prefix).Append(two).Append(suffix);
+            var prev = enumerator.Current;
+            while (enumerator.MoveNext())
             {
-                if (!enumerator.MoveNext())
-                    return "";
-
-                // Optimize the case where there is only one element
-                var one = enumerator.Current;
-                if (!enumerator.MoveNext())
-                    return prefix + one + suffix;
-
-                // Optimize the case where there are only two elements
-                var two = enumerator.Current;
-                if (!enumerator.MoveNext())
-                    // Optimize the (common) case where there is no prefix/suffix; this prevents an array allocation when calling string.Concat()
-                    return prefix == null && suffix == null ? one + lastSeparator + two : prefix + one + suffix + lastSeparator + prefix + two + suffix;
-
-                var sb = new StringBuilder()
-                    .Append(prefix).Append(one).Append(suffix).Append(separator)
-                    .Append(prefix).Append(two).Append(suffix);
-                var prev = enumerator.Current;
-                while (enumerator.MoveNext())
-                {
-                    sb.Append(separator).Append(prefix).Append(prev).Append(suffix);
-                    prev = enumerator.Current;
-                }
-                sb.Append(lastSeparator).Append(prefix).Append(prev).Append(suffix);
-                return sb.ToString();
+                sb.Append(separator).Append(prefix).Append(prev).Append(suffix);
+                prev = enumerator.Current;
             }
+            sb.Append(lastSeparator).Append(prefix).Append(prev).Append(suffix);
+            return sb.ToString();
         }
     }
 }
