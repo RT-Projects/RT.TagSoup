@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
@@ -15,6 +15,26 @@ namespace RT.TagSoup
         protected override IEnumerable<string> enumerateAttributes()
         {
             if (accesskey != null) { yield return " accesskey="; yield return attributeValue(accesskey); }
+            switch (aria_atomic) { case truefalse.true_: yield return " aria-atomic=true"; break; case truefalse.false_: yield return " aria-atomic=false"; break; }
+            switch (aria_busy) { case truefalse.true_: yield return " aria-busy=true"; break; case truefalse.false_: yield return " aria-busy=false"; break; }
+            if (aria_controls != null) { yield return " aria-controls="; yield return attributeValue(aria_controls); }
+            switch (aria_current) { case ariacurrent.true_: yield return " aria-current=true"; break; case ariacurrent.false_: yield return " aria-current=false"; break; case ariacurrent.page: yield return " aria-current=page"; break; case ariacurrent.step: yield return " aria-current=step"; break; case ariacurrent.location: yield return " aria-current=location"; break; case ariacurrent.date: yield return " aria-current=date"; break; case ariacurrent.time: yield return " aria-current=time"; break; }
+            if (aria_describedby != null) { yield return " aria-describedby="; yield return attributeValue(aria_describedby); }
+            if (aria_description != null) { yield return " aria-description="; yield return attributeValue(aria_description); }
+            if (aria_details != null) { yield return " aria-details="; yield return attributeValue(aria_details); }
+            switch (aria_disabled) { case truefalse.true_: yield return " aria-disabled=true"; break; case truefalse.false_: yield return " aria-disabled=false"; break; }
+            if (aria_errormessage != null) { yield return " aria-errormessage="; yield return attributeValue(aria_errormessage); }
+            if (aria_flowto != null) { yield return " aria-flowto="; yield return attributeValue(aria_flowto); }
+            switch (aria_haspopup) { case ariahaspopup.true_: yield return " aria-haspopup=true"; break; case ariahaspopup.false_: yield return " aria-haspopup=false"; break; case ariahaspopup.menu: yield return " aria-haspopup=menu"; break; case ariahaspopup.listbox: yield return " aria-haspopup=listbox"; break; case ariahaspopup.tree: yield return " aria-haspopup=tree"; break; case ariahaspopup.grid: yield return " aria-haspopup=grid"; break; case ariahaspopup.dialog: yield return " aria-haspopup=dialog"; break; }
+            switch (aria_hidden) { case truefalse.true_: yield return " aria-hidden=true"; break; case truefalse.false_: yield return " aria-hidden=false"; break; }
+            switch (aria_invalid) { case ariainvalid.true_: yield return " aria-invalid=true"; break; case ariainvalid.false_: yield return " aria-invalid=false"; break; case ariainvalid.grammar: yield return " aria-invalid=grammar"; break; case ariainvalid.spelling: yield return " aria-invalid=spelling"; break; }
+            if (aria_keyshortcuts != null) { yield return " aria-keyshortcuts="; yield return attributeValue(aria_keyshortcuts); }
+            if (aria_label != null) { yield return " aria-label="; yield return attributeValue(aria_label); }
+            if (aria_labelledby != null) { yield return " aria-labelledby="; yield return attributeValue(aria_labelledby); }
+            switch (aria_live) { case arialive.off: yield return " aria-live=off"; break; case arialive.assertive: yield return " aria-live=assertive"; break; case arialive.polite: yield return " aria-live=polite"; break; }
+            if (aria_owns != null) { yield return " aria-owns="; yield return attributeValue(aria_owns); }
+            switch (aria_relevent) { case ariarelevent.all: yield return " aria-relevent=all"; break; case ariarelevent.additions: yield return " aria-relevent=additions"; break; case ariarelevent.removals: yield return " aria-relevent=removals"; break; case ariarelevent.text: yield return " aria-relevent=text"; break; }
+            if (aria_roledescription != null) { yield return " aria-roledescription="; yield return attributeValue(aria_roledescription); }
             if (class_ != null) { yield return " class="; yield return attributeValue(class_); }
             switch (contenteditable) { case truefalse.true_: yield return " contenteditable=true"; break; case truefalse.false_: yield return " contenteditable=false"; break; }
             if (contextmenu != null) { yield return " contextmenu="; yield return attributeValue(contextmenu); }
@@ -29,6 +49,7 @@ namespace RT.TagSoup
             if (itemscope) yield return " itemscope";
             if (itemtype != null) { yield return " itemtype="; yield return attributeValue(itemtype); }
             if (lang != null) { yield return " lang="; yield return attributeValue(lang); }
+            switch (role) { case role._: break; case role.switch_: yield return " role=switch"; break; default: yield return " role="; yield return attributeValue(role.ToString()); break; }
             switch (spellcheck) { case truefalse.true_: yield return " spellcheck=true"; break; case truefalse.false_: yield return " spellcheck=false"; break; }
             if (style != null) { yield return " style="; yield return attributeValue(style); }
             if (tabindex != null) { yield return " tabindex="; yield return attributeValue(tabindex.ToString()); }
@@ -99,6 +120,26 @@ namespace RT.TagSoup
 
         // Attributes common to all HTML tags
         public string accesskey;
+        public truefalse aria_atomic;
+        public truefalse aria_busy;
+        public string aria_controls;
+        public ariacurrent aria_current;
+        public string aria_describedby;
+        public string aria_description;
+        public string aria_details;
+        public truefalse aria_disabled;
+        public string aria_errormessage;
+        public string aria_flowto;
+        public ariahaspopup aria_haspopup;
+        public truefalse aria_hidden;
+        public ariainvalid aria_invalid;
+        public string aria_keyshortcuts;
+        public string aria_label;
+        public string aria_labelledby;
+        public arialive aria_live;
+        public string aria_owns;
+        public ariarelevent aria_relevent;
+        public string aria_roledescription;
         public string class_;
         public truefalse contenteditable;
         public string contextmenu;
@@ -113,6 +154,7 @@ namespace RT.TagSoup
         public bool itemscope;
         public string itemtype;
         public string lang;
+        public role role;
         public truefalse spellcheck;
         public string style;
         public int? tabindex;
@@ -267,9 +309,15 @@ namespace RT.TagSoup
     public enum dir { _, ltr, rtl, auto }
     public enum dropzone { _, copy, move, link }
     public enum method { _, get, post }
+    public enum role { _, alert, alertdialog, application, article, banner, button, cell, checkbox, columnheader, combobox, comment, complementary, contentinfo, definition, dialog, document, feed, figure, form, generic, grid, gridcell, group, heading, img, link, list, listbox, listitem, log, main, mark, marquee, math, menu, menubar, menuitem, menuitemcheckbox, menuitemradio, meter, navigation, none, note, option, presentation, progressbar, radio, radiogroup, region, row, rowgroup, rowheader, scrollbar, search, searchbox, separator, slider, spinbutton, status, suggestion, switch_, tab, table, tablist, tabpanel, term, textbox, timer, toolbar, tooltip, tree, treegrid, treeitem }
+    public enum ariacurrent { _, true_, false_, page, step, location, date, time }
+    public enum ariahaspopup { _, true_, false_, menu, listbox, tree, grid, dialog }
+    public enum ariainvalid { _, true_, false_, grammar, spelling }
+    public enum arialive { _, off, assertive, polite }
+    public enum ariarelevent { _, all, additions, removals, text }
 
     /* HTML tags generated code START */
-    
+
     public sealed class A : HtmlTag
     {
         public A() : base() { }
